@@ -122,6 +122,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'south',
+    'freeradius',
+    'scheduler',
 )
 
 # A sample logging configuration. The only tangible logging
