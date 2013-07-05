@@ -47,3 +47,16 @@ class Radreply(models.Model):
 
     def __unicode__(self):
         return '{0}: {1} {2} {3}'.format(self.username, self.attribute, self.op, self.value)
+
+# Dummy table required by freeradius
+class Radusergroup(models.Model):
+    username = models.CharField('Username', max_length=32)
+    groupname = models.CharField('Groupname', max_length=32)
+    priority = models.PositiveIntegerField('Priority', default=0)
+
+    class Meta:
+        db_table = 'radusergroup'
+        verbose_name_plural = 'radusergroups'
+
+    def __unicode__(self):
+        return '{0} assigned to group {1}'.format(self.username, self.groupname)
