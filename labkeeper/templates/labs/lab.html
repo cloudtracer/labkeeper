@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<h1>{{ lab }}</h1>
+<ul>{% for pod in lab.pods.all %}
+    <li>Pod: {{ pod.name }}
+    <ul>{% for device in pod.devices.all %}
+        <li>{{ device.name }}</li>
+    {% endfor %}</ul>
+    </li>
+{% endfor %}</ul>
+{% endblock %}
