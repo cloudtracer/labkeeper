@@ -77,6 +77,6 @@ class Command(NoArgsCommand):
     help = 'Starts the RADIUS daemon'
 
     def handle_noargs(self, **options):
-        srv=RadiusServer(dict=dictionary.Dictionary('/home/stretch/myradiusd/dictionary'))
+        srv=RadiusServer(dict=dictionary.Dictionary('radiusd/dictionary'))
         srv.BindToAddress('')
         srv.Run()
