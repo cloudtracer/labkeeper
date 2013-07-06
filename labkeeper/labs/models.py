@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Lab(models.Model):
-    name = models.CharField('Name', max_length=80)
+    name = models.CharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField('Public', default=True)
 
     class Meta:
@@ -18,7 +18,7 @@ class Pod(models.Model):
     name = models.CharField('Name', max_length=80, default='Default')
 
     class Meta:
-        pass
+        unique_together = (('lab', 'name'),)
 
     def __unicode__(self):
         return "Lab '{0}' - Pod '{1}'".format(self.lab, self.name)
@@ -29,7 +29,7 @@ class Device(models.Model):
     name = models.CharField('Name', max_length=30)
 
     class Meta:
-        pass
+        unique_together = (('pod', 'name'),)
 
     def __unicode__(self):
         return self.name
@@ -44,7 +44,7 @@ class ConsoleServer(models.Model):
     secret = models.CharField('Shared secret', max_length=30, default='')
 
     class Meta:
-        pass
+        unique_together = (('lab', 'name'), ('lab', 'fqdn'), ('lab', 'ip4_address'))
 
     def __unicode__(self):
         return self.name
@@ -58,7 +58,7 @@ class ConsoleServerPort(models.Model):
     ssh_port = models.PositiveIntegerField('SSH port', blank=True)
 
     class Meta:
-        pass
+        unique_together = (('consoleserver', 'number'),)
 
     def __unicode__(self):
         return "{0} port {1}".format(self.consoleserver, self.number)
@@ -70,7 +70,7 @@ class Membership(models.Model):
     role = models.PositiveSmallIntegerField('Role')
 
     class Meta:
-        pass
+        unique_together = (('user', 'lab'),)
 
     def __unicode__(self):
         return "{0} is a member of {1}".format(self.user, self.lab)
