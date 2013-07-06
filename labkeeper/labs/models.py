@@ -24,8 +24,20 @@ class Pod(models.Model):
         return "Lab '{0}' - Pod '{1}'".format(self.lab, self.name)
 
 
+class Device(models.Model):
+    pod = models.ForeignKey(Pod, related_name='devices')
+    name = models.CharField('Name', max_length=30)
+
+    class Meta:
+        pass
+
+    def __unicode__(self):
+        return self.name
+
+
 class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
+    devices = models.ManyToManyField(Device, through='ConsoleServerPort')
     name = models.CharField('Name', max_length=30)
     fqdn = models.CharField('Domain name', max_length=50, blank=True)
     ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
@@ -35,19 +47,21 @@ class ConsoleServer(models.Model):
         pass
 
     def __unicode__(self):
-        return "Lab '{0}' - Console Server '{1}'".format(self.lab, self.name)
+        return self.name
 
 
-class Device(models.Model):
-    pod = models.ForeignKey(Pod, related_name='devices')
-    consoleserver = models.ForeignKey(ConsoleServer, related_name='devices')
-    name = models.CharField('Name', max_length=30)
+class ConsoleServerPort(models.Model):
+    consoleserver = models.ForeignKey(ConsoleServer, related_name='ports')
+    device = models.OneToOneField(Device, related_name='port')
+    number = models.PositiveIntegerField('Port number')
+    telnet_port = models.PositiveIntegerField('Telnet port', blank=True)
+    ssh_port = models.PositiveIntegerField('SSH port', blank=True)
 
     class Meta:
         pass
 
     def __unicode__(self):
-        return self.name
+        return "{0} port {1}".format(self.consoleserver, self.number)
 
 
 class Membership(models.Model):
