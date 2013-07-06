@@ -27,6 +27,9 @@ class Pod(models.Model):
 class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
     name = models.CharField('Name', max_length=30)
+    fqdn = models.CharField('Domain name', max_length=50, blank=True)
+    ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
+    secret = models.CharField('Shared secret', max_length=30, default='')
 
     class Meta:
         pass

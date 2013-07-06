@@ -14,9 +14,10 @@ class Migration(SchemaMigration):
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['auth.User'])),
             ('pod', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['labs.Pod'])),
             ('created_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('created_ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, blank=True)),
+            ('created_ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
             ('start_time', self.gf('django.db.models.fields.DateTimeField')()),
             ('duration', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
+            ('end_time', self.gf('django.db.models.fields.DateTimeField')(null=True)),
             ('password', self.gf('django.db.models.fields.CharField')(max_length=16)),
         ))
         db.send_create_signal(u'scheduler', ['Reservation'])
@@ -78,9 +79,10 @@ class Migration(SchemaMigration):
         },
         u'scheduler.reservation': {
             'Meta': {'object_name': 'Reservation'},
-            'created_ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'blank': 'True'}),
+            'created_ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'created_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'duration': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
+            'end_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
             'pod': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['labs.Pod']"}),

@@ -1,33 +1,54 @@
 from pyrad import dictionary, packet, server
-from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.management.base import NoArgsCommand
+from django.utils import timezone
 
 from scheduler.models import Reservation
+from labs.models import ConsoleServer
 
 class RadiusServer(server.Server):
 
+    # Here we're overriding Server's internal auth method because we need to handle NAS authentication dynamically
     def _HandleAuthPacket(self, pkt):
-        server.Server._HandleAuthPacket(self, pkt)
+
+        # Sanity-checking
+        if pkt.code != packet.AccessRequest:
+            raise server.ServerPacketError("Received non-authentication packet on authentication port")
 
         print "Received an authentication request"
         print "Attributes: "
         for attr in pkt.keys():
             print "%s: %s" % (attr, pkt[attr])
 
+        # Check that the request is coming from a valid ConsoleServer
+        # This will need to be improved upon for IPv6 and DNS resolution support
+        try:
+            c = ConsoleServer.objects.get(ip4_address=pkt.source[0])
+            pkt.secret = str(c.secret) # Convert from Unicode to plain string
+        except ConsoleServer.DoesNotExist:
+             raise server.ServerPacketError("Unrecognized console server ({0})".format(pkt.source[0]))
+
+        # Craft a reply packet
         reply=self.CreateReplyPacket(pkt)
 
-        # Authenticate supplied credentials
+        # Attempt to find a Reservation matching the supplied credentials
         try:
-            user = User.objects.get(username=pkt['User-Name'][0])
-            r = Reservation.objects.get(user=user, password=pkt.PwDecrypt(pkt['User-Password'][0]), start_time__lte=datetime.now())
-            print "Authenticated as {0} (reservation {1})".format(user.username, r.id)
+            u = User.objects.get(username=pkt['User-Name'][0])
+            r = Reservation.objects.get(user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]), start_time__lte=timezone.now(), end_time__gt=timezone.now())
+            print "Authenticated as {0} (reservation {1})".format(u.username, r.id)
             reply.code=packet.AccessAccept
-            reply.AddAttribute('Session-Timeout', r.duration * 3600)
-        except (User.DoesNotExist, Reservation.DoesNotExist):
-            print "Authentication failed"
+            reply.AddAttribute('Session-Timeout', r.time_left.seconds)
+            reply.AddAttribute('Termination-Action', 0)
+            reply.AddAttribute('Reply-Message', "Welcome to {0}! Reservartion ID: {1}\nYour reservation ends in {2}.".format(r.pod, r.id, str(r.time_left).split('.')[0]))
+        except User.DoesNotExist:
+            print "Invalid username: {0}".format(pkt['User-Name'][0])
             reply.code=packet.AccessReject
+        except Reservation.DoesNotExist:
+            print "No reservation found"
+            reply.code=packet.AccessReject
+
+        # TODO: Check that port reported by ConsoleServer belongs to a device in Pod
 
         self.SendReplyPacket(pkt.fd, reply)
 
@@ -36,7 +57,5 @@ class Command(NoArgsCommand):
 
     def handle_noargs(self, **options):
         srv=RadiusServer(dict=dictionary.Dictionary('/home/stretch/myradiusd/dictionary'))
-        srv.hosts["127.0.0.1"]=server.RemoteHost("127.0.0.1", "testing123", "localhost")
-        #srv.hosts["192.168.0.118"]=server.RemoteHost("192.168.0.118", "testing123", "testrouter")
-        srv.BindToAddress("")
+        srv.BindToAddress('')
         srv.Run()

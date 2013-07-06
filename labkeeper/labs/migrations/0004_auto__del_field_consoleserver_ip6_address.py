@@ -8,24 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'Reservation'
-        db.create_table(u'scheduler_reservation', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['auth.User'])),
-            ('pod', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['labs.Pod'])),
-            ('created_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('created_ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
-            ('start_time', self.gf('django.db.models.fields.DateTimeField')()),
-            ('duration', self.gf('django.db.models.fields.PositiveSmallIntegerField')()),
-            ('end_time', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-            ('password', self.gf('django.db.models.fields.CharField')(max_length=16)),
-        ))
-        db.send_create_signal(u'scheduler', ['Reservation'])
+        # Deleting field 'ConsoleServer.ip6_address'
+        db.delete_column(u'labs_consoleserver', 'ip6_address')
 
 
     def backwards(self, orm):
-        # Deleting model 'Reservation'
-        db.delete_table(u'scheduler_reservation')
+        # Adding field 'ConsoleServer.ip6_address'
+        db.add_column(u'labs_consoleserver', 'ip6_address',
+                      self.gf('django.db.models.fields.GenericIPAddressField')(default='::', max_length=39, blank=True),
+                      keep_default=False)
 
 
     models = {
@@ -65,30 +56,40 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
+        u'labs.consoleserver': {
+            'Meta': {'object_name': 'ConsoleServer'},
+            'fqdn': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip4_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39'}),
+            'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'consoleservers'", 'to': u"orm['labs.Lab']"}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '30'})
+        },
+        u'labs.device': {
+            'Meta': {'object_name': 'Device'},
+            'consoleserver': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'devices'", 'to': u"orm['labs.ConsoleServer']"}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
+            'pod': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'devices'", 'to': u"orm['labs.Pod']"})
+        },
         u'labs.lab': {
             'Meta': {'object_name': 'Lab'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '80'})
         },
+        u'labs.membership': {
+            'Meta': {'object_name': 'Membership'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'memberships'", 'to': u"orm['labs.Lab']"}),
+            'role': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'memberships'", 'to': u"orm['auth.User']"})
+        },
         u'labs.pod': {
             'Meta': {'object_name': 'Pod'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'pods'", 'to': u"orm['labs.Lab']"}),
             'name': ('django.db.models.fields.CharField', [], {'default': "'Default'", 'max_length': '80'})
-        },
-        u'scheduler.reservation': {
-            'Meta': {'object_name': 'Reservation'},
-            'created_ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
-            'created_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'duration': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
-            'end_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
-            'pod': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['labs.Pod']"}),
-            'start_time': ('django.db.models.fields.DateTimeField', [], {}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['auth.User']"})
         }
     }
 
-    complete_apps = ['scheduler']
+    complete_apps = ['labs']
