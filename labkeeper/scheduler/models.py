@@ -3,6 +3,7 @@ from django.db import models
 
 from labs.models import Pod
 
+
 class Reservation(models.Model):
     """A reservation made by a User for a Pod."""
 
@@ -13,3 +14,9 @@ class Reservation(models.Model):
     start_time = models.DateTimeField('Start time')
     duration = models.PositiveSmallIntegerField('Duration (hours)')
     password = models.CharField('Password', max_length=16)
+
+    class Meta:
+        pass
+
+    def __unicode__(self):
+        return "{0} reserved by {1} at {2}".format(self.pod, self.user, self.start_time)
