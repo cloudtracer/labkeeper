@@ -12,6 +12,7 @@ class Migration(SchemaMigration):
         db.create_table(u'scheduler_reservation', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['auth.User'])),
+            ('pod', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['labs.Pod'])),
             ('created_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('created_ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, blank=True)),
             ('start_time', self.gf('django.db.models.fields.DateTimeField')()),
@@ -20,22 +21,10 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'scheduler', ['Reservation'])
 
-        # Adding M2M table for field pod on 'Reservation'
-        m2m_table_name = db.shorten_name(u'scheduler_reservation_pod')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('reservation', models.ForeignKey(orm[u'scheduler.reservation'], null=False)),
-            ('pod', models.ForeignKey(orm[u'labs.pod'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['reservation_id', 'pod_id'])
-
 
     def backwards(self, orm):
         # Deleting model 'Reservation'
         db.delete_table(u'scheduler_reservation')
-
-        # Removing M2M table for field pod on 'Reservation'
-        db.delete_table(db.shorten_name(u'scheduler_reservation_pod'))
 
 
     models = {
@@ -94,7 +83,7 @@ class Migration(SchemaMigration):
             'duration': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
-            'pod': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'reservations'", 'symmetrical': 'False', 'to': u"orm['labs.Pod']"}),
+            'pod': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['labs.Pod']"}),
             'start_time': ('django.db.models.fields.DateTimeField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['auth.User']"})
         }

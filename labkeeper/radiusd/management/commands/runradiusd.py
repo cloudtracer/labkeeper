@@ -1,8 +1,10 @@
 from pyrad import dictionary, packet, server
+from datetime import datetime
 
-from django.core.management.base import NoArgsCommand, CommandError
+from django.contrib.auth.models import User
+from django.core.management.base import NoArgsCommand
 
-from freeradius.models import Radcheck
+from scheduler.models import Reservation
 
 class RadiusServer(server.Server):
 
@@ -18,11 +20,13 @@ class RadiusServer(server.Server):
 
         # Authenticate supplied credentials
         try:
-            Radcheck.objects.get(username=pkt['User-Name'][0], attribute='Cleartext-Password', value=pkt.PwDecrypt(pkt['User-Password'][0]))
-            print "Password matches!"
+            user = User.objects.get(username=pkt['User-Name'][0])
+            r = Reservation.objects.get(user=user, password=pkt.PwDecrypt(pkt['User-Password'][0]), start_time__lte=datetime.now())
+            print "Authenticated as {0} (reservation {1})".format(user.username, r.id)
             reply.code=packet.AccessAccept
-        except Radcheck.DoesNotExist:
-            print "Invalid password :("
+            reply.AddAttribute('Session-Timeout', r.duration * 3600)
+        except (User.DoesNotExist, Reservation.DoesNotExist):
+            print "Authentication failed"
             reply.code=packet.AccessReject
 
         self.SendReplyPacket(pkt.fd, reply)
@@ -33,6 +37,6 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         srv=RadiusServer(dict=dictionary.Dictionary('/home/stretch/myradiusd/dictionary'))
         srv.hosts["127.0.0.1"]=server.RemoteHost("127.0.0.1", "testing123", "localhost")
-        srv.hosts["192.168.0.118"]=server.RemoteHost("192.168.0.118", "testing123", "testrouter")
+        #srv.hosts["192.168.0.118"]=server.RemoteHost("192.168.0.118", "testing123", "testrouter")
         srv.BindToAddress("")
         srv.Run()
