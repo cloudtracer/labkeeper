@@ -56,7 +56,6 @@ class Radusergroup(models.Model):
 
     class Meta:
         db_table = 'radusergroup'
-        verbose_name_plural = 'radusergroups'
 
     def __unicode__(self):
         return '{0} assigned to group {1}'.format(self.username, self.groupname)
