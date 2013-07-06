@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>LabKeeper</title>
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+  <div class="navbar">
+    <div class="navbar-inner">
+      <a class="brand" href="#">LabKeeper</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'labs' %}">Labs</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+{% block content %}{% endblock %}
+</div>
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+</body>
+</html>

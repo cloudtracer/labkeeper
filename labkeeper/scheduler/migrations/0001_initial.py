@@ -69,10 +69,10 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Lab'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '80'})
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'})
         },
         u'labs.pod': {
-            'Meta': {'object_name': 'Pod'},
+            'Meta': {'unique_together': "(('lab', 'name'),)", 'object_name': 'Pod'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'pods'", 'to': u"orm['labs.Lab']"}),
             'name': ('django.db.models.fields.CharField', [], {'default': "'Default'", 'max_length': '80'})
