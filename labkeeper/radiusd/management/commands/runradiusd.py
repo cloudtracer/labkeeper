@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from scheduler.models import Reservation
 from labs.models import ConsoleServer, ConsoleServerPort
+from radiusd.models import RadiusLogin
 
 class RadiusServer(server.Server):
 
@@ -95,17 +96,25 @@ class RadiusServer(server.Server):
         attrs = {
             'Session-Timeout':      r.time_left.seconds,
             'Termination-Action':   0,
-            'Reply-Message':        "Welcome to {0}! Reservartion ID: {1}\nYour reservation ends in {2}.".format(r.pod, r.id, str(r.time_left).split('.')[0]),
+            'Reply-Message':        "Welcome to {0} - Pod {1}! Reservartion ID: {2}\nYour reservation ends in {3}.".format(r.pod.lab, r.pod, r.id, str(r.time_left).split('.')[0]),
         }
         for k, v in attrs.items():
             reply.AddAttribute(k, v)
 
         self.SendReplyPacket(pkt.fd, reply)
 
-    # TODO: Implement accounting functionality
+        # Logging
+        login = RadiusLogin(device = d, user = u)
+        try:
+            login.user_ip = pkt['Calling-Station-Id'][0]
+        except KeyError:
+            pass
+        login.save()
+
+    # TODO: Implement accounting functionality?
 
 class Command(NoArgsCommand):
-    help = 'Starts the RADIUS daemon'
+    help = "Starts the RADIUS daemon"
 
     def handle_noargs(self, **options):
         srv=RadiusServer(dict=dictionary.Dictionary('radiusd/dictionary'))

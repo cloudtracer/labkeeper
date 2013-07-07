@@ -9,10 +9,12 @@ class LabAdmin(admin.ModelAdmin):
 
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'pod', 'port')
+    readonly_fields = ('slug',)
 
 
 class PodAdmin(admin.ModelAdmin):
     list_display = ('name', 'lab')
+    readonly_fields = ('slug',)
 
 
 class ConsoleServerPortInline(admin.TabularInline):
