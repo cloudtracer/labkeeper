@@ -20,6 +20,7 @@ class Pod(models.Model):
     slug = models.SlugField('Slug', max_length=30, editable=False)
 
     class Meta:
+        ordering = ['name']
         unique_together = (
             ('lab', 'name'),
         )
@@ -53,6 +54,7 @@ class Device(models.Model):
     type = models.PositiveSmallIntegerField('Type', choices=DEVICE_TYPES, default=ROUTER)
 
     class Meta:
+        ordering = ['name']
         unique_together = (
             ('pod', 'name'),
             ('pod', 'slug'),
