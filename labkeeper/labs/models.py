@@ -39,7 +39,7 @@ class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
     devices = models.ManyToManyField(Device, through='ConsoleServerPort')
     name = models.CharField('Name', max_length=30)
-    fqdn = models.CharField('Domain name', max_length=50, blank=True)
+    fqdn = models.CharField('Domain name', max_length=50, unique=True, blank=True)
     ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
     secret = models.CharField('Shared secret', max_length=30, default='')
 

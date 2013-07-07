@@ -1,3 +1,4 @@
+import socket
 from pyrad import dictionary, packet, server
 
 from django.contrib.auth.models import User
@@ -14,31 +15,61 @@ class RadiusServer(server.Server):
 
         # Sanity-checking
         if pkt.code != packet.AccessRequest:
-            raise server.ServerPacketError("Received non-authentication packet on authentication port")
+            print "Received non-authentication packet on authentication port"
+            raise server.ServerPacketError()
 
         print "Authentication request received from {0}:".format(pkt.source[0])
         for attr in pkt.keys():
             print "  {0:20} {1}".format(attr, pkt[attr])
 
-        # Check that the request is coming from a valid ConsoleServer
-        # This will need to be improved upon for IPv6 and DNS resolution support
+        # TODO: Input sanitization
+
+        # Check for a domain in username
         try:
-            c = ConsoleServer.objects.get(ip4_address=pkt.source[0])
-            pkt.secret = str(c.secret) # Convert from Unicode to plain string
-        except ConsoleServer.DoesNotExist:
-             raise server.ServerPacketError("Unrecognized console server ({0})".format(pkt.source[0]))
+            username, userdomain = pkt['User-Name'][0].split('@', 1)
+        except ValueError:
+            username = pkt['User-Name'][0]
+            userdomain = None
+
+        # If domain is specified, use it to identify ConsoleServer
+        if userdomain:
+            print "Identifying console server by domain ({0})".format(userdomain)
+            try:
+                c = ConsoleServer.objects.get(fqdn=userdomain)
+            except ConsoleServer.DoesNotExist:
+                print "Unrecognized console server ({0})".format(userdomain)
+                raise server.ServerPacketError()
+            # Enforce IP address if one has been set for the ConsoleServer
+            if c.ip4_address and c.ip4_address != pkt.source[0]:
+                print "Requester IP ({0}) does not match console server IP ({1})".format(c.ip4_address, pkt.source[0])
+                raise server.ServerPacketError()
+            # Verify that the domain specified resolves to the requester's IP
+            if not socket.gethostbyname(userdomain) == pkt.source[0]:
+                print "Domain authentication failure from {0} for {1} (actual IP {2})".format(pkt.source[0], userdomain, c.ip4_address)
+                raise server.ServerPacketError()
+        else:
+            print "Identifying console server by IP address ({0})".format(pkt.source[0])
+            try:
+                c = ConsoleServer.objects.get(ip4_address=pkt.source[0])
+            except ConsoleServer.DoesNotExist:
+                print "Unrecognized console server ({0})".format(pkt.source[0])
+                raise server.ServerPacketError()
+        print "Found console server: {0}".format(c)
+
+        # Record shared secret stored by ConsoleServer
+        pkt.secret = str(c.secret)
 
         # Initialize a reply packet
         reply = self.CreateReplyPacket(pkt)
-        reply.code = packet.AccessReject
 
         # Attempt to find a Reservation matching the supplied credentials
         try:
-            u = User.objects.get(username=pkt['User-Name'][0])
+            u = User.objects.get(username=username)
             r = Reservation.objects.get(user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]), start_time__lte=timezone.now(), end_time__gt=timezone.now())
         except (User.DoesNotExist, Reservation.DoesNotExist):
-            print "No reservation found for user '{0}'".format(pkt['User-Name'][0])
+            print "No reservation found for user '{0}'".format(username)
             reply.AddAttribute('Reply-Message', 'No reservation found')
+            reply.code = packet.AccessReject
             self.SendReplyPacket(pkt.fd, reply)
             return
 
