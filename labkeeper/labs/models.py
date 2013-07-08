@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 
-from tinymce.models import HTMLField
+from django_bleach.models import BleachField
 
 
 class Lab(models.Model):
@@ -25,7 +25,7 @@ class LabProfile(models.Model):
     lab = models.OneToOneField(Lab, related_name='profile')
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
-    content = HTMLField('Content', blank=True)
+    content = BleachField(blank=True)
 
     class Meta:
         pass

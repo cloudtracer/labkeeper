@@ -3,6 +3,7 @@ South==0.8.1
 argparse==1.2.1
 bleach==1.2.2
 distribute==0.6.34
+django-bleach==0.1.4
 django-debug-toolbar==0.9.4
 django-forms-bootstrap==2.0.3.post1
 django-tinymce==1.5.1
