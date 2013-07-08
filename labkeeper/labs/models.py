@@ -1,17 +1,37 @@
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
+
+from tinymce.models import HTMLField
 
 
 class Lab(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField('Public', default=True)
+    is_active = models.BooleanField('Active', default=False)
 
     class Meta:
         pass
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('lab', kwargs={'id': self.id})
+
+
+class LabProfile(models.Model):
+    lab = models.OneToOneField(Lab, related_name='profile')
+    last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
+    last_edited_by = models.ForeignKey(User, editable=False, null=True)
+    content = HTMLField('Content', blank=True)
+
+    class Meta:
+        pass
+
+    def __unicode__(self):
+        return "Profile for {0}".format(self.lab.name)
 
 
 class Pod(models.Model):

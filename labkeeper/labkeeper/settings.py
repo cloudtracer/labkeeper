@@ -135,15 +135,28 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'debug_toolbar',
+    'django_forms_bootstrap',
+    'tinymce',
     'labs',
     'scheduler',
     'radiusd',
 )
 
-# For debug_toolbar
-INTERNAL_IPS = (
-    '127.0.0.1',
-)
+# Django debug toolbar
+INTERNAL_IPS = ('127.0.0.1',)
+DEBUG_TOOLBAR_CONFIG = {
+    'INTERCEPT_REDIRECTS': False,
+}
+
+# TinyMCE
+TINYMCE_JS_URL = 'http://tinymce.cachefly.net/4.0/tinymce.min.js'
+TINYMCE_DEFAULT_CONFIG = {
+    'plugins': "code,link,paste,table,searchreplace",
+    #'theme': "simple",
+    'cleanup_on_startup': True,
+    'custom_undo_redo_levels': 10,
+    'removed_menuitems': 'newdocument',
+}
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

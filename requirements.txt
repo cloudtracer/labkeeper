@@ -1,8 +1,12 @@
 Django==1.5.1
 South==0.8.1
 argparse==1.2.1
+bleach==1.2.2
 distribute==0.6.34
 django-debug-toolbar==0.9.4
+django-forms-bootstrap==2.0.3.post1
+django-tinymce==1.5.1
+html5lib==0.95
 psycopg2==2.5.1
 pyrad==2.0
 pytz==2013b

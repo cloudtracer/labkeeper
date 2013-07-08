@@ -7,6 +7,7 @@ urlpatterns = patterns('',
     url(r'^$', 'labkeeper.views.default', name='home'),
 
     url(r'^labs/', include('labs.urls')),
+    url(r'^tinymce/', include('tinymce.urls')),
 
     # Admin interface
     url(r'^admin/', include(admin.site.urls)),

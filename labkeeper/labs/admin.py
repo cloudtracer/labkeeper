@@ -1,10 +1,14 @@
 from django.contrib import admin
 
-from labs.models import Lab, Pod, Device, ConsoleServer, ConsoleServerPort
+from labs.models import Lab, LabProfile, Pod, Device, ConsoleServer, ConsoleServerPort
 
 
 class LabAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_public')
+
+
+class LabProfileAdmin(admin.ModelAdmin):
+    list_display = ('lab', 'last_edited', 'last_edited_by')
 
 
 class DeviceAdmin(admin.ModelAdmin):
@@ -33,6 +37,7 @@ class ConsoleServerAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Lab, LabAdmin)
+admin.site.register(LabProfile, LabProfileAdmin)
 admin.site.register(Pod, PodAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(ConsoleServerPort, ConsoleServerPortAdmin)
