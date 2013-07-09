@@ -27,7 +27,9 @@ def lab_edit(request, id):
     if request.method == 'POST':
         form = LabProfileForm(request.POST, instance=lab.profile)
         if form.is_valid():
-            form.save()
+            p = form.save()
+            p.last_edited_by = request.user
+            p.save()
             return redirect(lab.get_absolute_url())
 
     form = LabProfileForm(instance=lab.profile)

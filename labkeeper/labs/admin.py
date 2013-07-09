@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from labs.models import Lab, LabProfile, Pod, Device, ConsoleServer, ConsoleServerPort
+from labs.models import *
 
 
 class LabAdmin(admin.ModelAdmin):
@@ -36,9 +36,14 @@ class ConsoleServerAdmin(admin.ModelAdmin):
     ]
 
 
+class MembershipAdmin(admin.ModelAdmin):
+    list_display = ('user', 'lab', 'role')
+
+
 admin.site.register(Lab, LabAdmin)
 admin.site.register(LabProfile, LabProfileAdmin)
 admin.site.register(Pod, PodAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(ConsoleServerPort, ConsoleServerPortAdmin)
 admin.site.register(ConsoleServer, ConsoleServerAdmin)
+admin.site.register(Membership, MembershipAdmin)

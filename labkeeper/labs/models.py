@@ -20,6 +20,15 @@ class Lab(models.Model):
     def get_absolute_url(self):
         return reverse('lab', kwargs={'id': self.id})
 
+    def members(self):
+        return [m.user for m in self.memberships.all()]
+
+    def admins(self):
+        return [m.user for m in self.memberships.filter(role__in=(Membership.ADMIN, Membership.OWNER))]
+
+    def owners(self):
+        return [m.user for m in self.memberships.filter(role=Membership.OWNER)]
+
 
 class LabProfile(models.Model):
     lab = models.OneToOneField(Lab, related_name='profile')

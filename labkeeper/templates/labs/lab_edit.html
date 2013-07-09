@@ -14,7 +14,7 @@
         {% csrf_token %}
         {{ form|as_bootstrap }}
         <div class="form-actions">
-          <a href="#back" class="btn">Go back</a>
+          <a href="{{ lab.get_absolute_url }}" class="btn">Go back</a>
           <button type="submit" class="btn btn-primary">Save changes</button>
         </div>
       </fieldset>
