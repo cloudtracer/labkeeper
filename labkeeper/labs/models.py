@@ -45,7 +45,7 @@ class LabProfile(models.Model):
 
 class Pod(models.Model):
     lab = models.ForeignKey(Lab, related_name='pods')
-    name = models.CharField('Name', max_length=30, default='Default')
+    name = models.CharField('Name', max_length=30, default='')
     slug = models.SlugField('Slug', max_length=30, editable=False)
 
     class Meta:
@@ -79,8 +79,8 @@ class Device(models.Model):
     pod = models.ForeignKey(Pod, related_name='devices')
     name = models.CharField('Name', max_length=30)
     slug = models.SlugField('Slug', max_length=30, editable=False)
-    description = models.CharField('Description', max_length=80, blank=True)
     type = models.PositiveSmallIntegerField('Type', choices=DEVICE_TYPES, default=ROUTER)
+    description = models.CharField('Description', max_length=80, blank=True)
 
     class Meta:
         ordering = ['name']

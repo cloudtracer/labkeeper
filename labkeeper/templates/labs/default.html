@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Labs!</h1>
 <ul>
-{% for l in labs %}
+{% for l in lab_list %}
     <li><a href="{% url 'lab' l.id %}">{{ l }}</a></li>
 {% endfor %}
 </ul>

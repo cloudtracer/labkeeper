@@ -1,0 +1,31 @@
+{% extends 'labs/_manage.html' %}
+{% load widget_tweaks %}
+
+{% block lab_manage %}
+    <form class="form-horizontal" action="." method="post">
+      {{ formset.management_form }}
+      <fieldset>
+        <legend>Devices</legend>
+        {% csrf_token %}
+          <div class="row-fluid">
+            <div class="span3"><label>Name</label></div>
+            <div class="span2"><label>Pod</label></div>
+            <div class="span2"><label>Type</label></div>
+            <div class="span5"><label>Description</label></div>
+          </div>
+        {% for form in formset %}
+          {{ form.id }}
+          <div class="row-fluid control-group">
+            <div class="span3">{% render_field form.name class+="input-block-level" %}</div>
+            <div class="span2">{% render_field form.pod class+="input-block-level" %}</div>
+            <div class="span2">{% render_field form.type class+="input-block-level" %}</div>
+            <div class="span5">{% render_field form.description class+="input-block-level" %}</div>
+          </div>
+        {% endfor %}
+      </fieldset>
+      <div class="form-actions">
+        <a href="{{ lab.get_absolute_url }}" class="btn">Go back</a>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+      </div>
+    </form>
+{% endblock %}

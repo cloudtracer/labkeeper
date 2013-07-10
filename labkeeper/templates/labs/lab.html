@@ -1,7 +1,7 @@
 {% extends '_base.html' %}
 
 {% block content %}
-<h1>{{ lab }}{% if request.user in lab.admins %} <small><a href="{% url 'lab_edit' lab.id %}">edit</a></small>{% endif %}</h1>
+{% include 'labs/nav_header.html' %}
 <div class="row">
   <div class="span5">
     <p>{{ lab.profile.content|safe }}</p>

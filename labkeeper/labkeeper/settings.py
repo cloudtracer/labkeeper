@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'south',
     'debug_toolbar',
     'django_forms_bootstrap',
+    'widget_tweaks',
     'django_bleach',
     'tinymce',
     'labs',
