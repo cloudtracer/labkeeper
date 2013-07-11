@@ -1,25 +1,33 @@
 {% extends 'labs/_manage.html' %}
-{% load widget_tweaks %}
+{% load bootstrap_tags %}
 
 {% block lab_manage %}
-    <form class="form-horizontal" action="." method="post">
-      {{ formset.management_form }}
-      <fieldset>
-        <legend>Pods</legend>
-        {% csrf_token %}
-          <div class="row-fluid">
-            <div class="span3"><label>Name</label></div>
-          </div>
-        {% for form in formset %}
-          {{ form.id }}
-          <div class="row-fluid control-group">
-            <div class="span3">{% render_field form.name class+="input-block-level" %}</div>
-          </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Pod</th>
+          <th>Devices</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pod in pod_list %}
+        <tr>
+          <td>{{ pod }}</td>
+          <td>{{ pod.devices.all|join:", " }}</td>
+          <td>{% if not pod.devices.all %}<a href="{% url 'labs_delete_pod' pod.id %}" class="text-error">delete</a>{% endif %}</td>
+        </tr>
         {% endfor %}
+      </tbody>
+    </table>
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>Add a Pod</legend>
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
       </fieldset>
       <div class="form-actions">
-        <a href="{{ lab.get_absolute_url }}" class="btn">Go back</a>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <button type="submit" class="btn btn-primary">Create</button>
       </div>
     </form>
 {% endblock %}
