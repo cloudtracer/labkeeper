@@ -1,0 +1,37 @@
+{% extends 'labs/_manage.html' %}
+{% load bootstrap_tags %}
+
+{% block lab_manage %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Ports</th>
+          <th>Domain Name</th>
+          <th>IPv4 Address</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cs in cs_list %}
+        <tr>
+          <td>{{ cs.name }}</td>
+          <td>{{ cs.port_count }}</td>
+          <td>{{ cs.fqdn }}</td>
+          <td>{{ cs.ip4_address }}</td>
+          <td>{% if not cs.port_count %}<a href="{% url 'labs_delete_consoleserver' cs.id %}" class="text-error">delete</a>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>Add a Console Server</legend>
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+      </fieldset>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Create</button>
+      </div>
+    </form>
+{% endblock %}

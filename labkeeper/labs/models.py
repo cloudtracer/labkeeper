@@ -20,13 +20,13 @@ class Lab(models.Model):
     def get_absolute_url(self):
         return reverse('lab', kwargs={'id': self.id})
 
-    def members(self):
+    def get_members(self):
         return [m.user for m in self.memberships.all()]
 
-    def admins(self):
+    def get_admins(self):
         return [m.user for m in self.memberships.filter(role__in=(Membership.ADMIN, Membership.OWNER))]
 
-    def owners(self):
+    def get_owners(self):
         return [m.user for m in self.memberships.filter(role=Membership.OWNER)]
 
 
