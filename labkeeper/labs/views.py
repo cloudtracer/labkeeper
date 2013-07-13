@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
-from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabProfileForm, PodForm
+from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, PodForm
 
 
 def default(request):
@@ -25,7 +25,7 @@ def lab(request, lab_id):
         })
 
 
-def manage_profile(request, lab_id):
+def manage_lab(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
     if request.user not in lab.get_admins():
@@ -33,48 +33,20 @@ def manage_profile(request, lab_id):
 
     # Processing a submitted form
     if request.method == 'POST':
-        form = LabProfileForm(request.POST, instance=lab.profile)
+        form = LabForm(request.POST, instance=lab)
         if form.is_valid():
             p = form.save()
             p.last_edited_by = request.user
             p.save()
-            return redirect(lab.get_absolute_url())
+            return redirect(reverse('labs_manage_lab', kwargs={'lab_id': lab.id}))
     else:
-        form = LabProfileForm(instance=lab.profile)
+        form = LabForm(instance=lab)
 
-    return render(request, 'labs/manage_profile.html', {
+    return render(request, 'labs/manage_lab.html', {
         'lab': lab,
         'form': form,
         'nav_labs': 'manage',
         'nav_labs_manage': 'profile',
-        })
-
-
-def manage_devices(request, lab_id):
-
-    lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_admins():
-        return HttpResponseForbidden()
-
-    DeviceFormSet = modelformset_factory(Device, can_delete=True, extra=1)
-
-    if request.method == 'POST':
-        formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
-        for form in formset:
-            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
-        if formset.is_valid():
-            formset.save()
-            return redirect(reverse('labs_manage_devices', kwargs={'lab_id': lab.id}))
-    else:
-        formset = DeviceFormSet(queryset=Device.objects.filter(pod__lab=lab))
-        for form in formset:
-            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
-
-    return render(request, 'labs/manage_devices.html', {
-        'lab': lab,
-        'formset': formset,
-        'nav_labs': 'manage',
-        'nav_labs_manage': 'devices',
         })
 
 
@@ -187,3 +159,33 @@ def delete_consoleserver(request, cs_id):
     cs.delete()
 
     return redirect(reverse('labs_manage_consoleservers', kwargs={'lab_id': cs.lab.id}))
+
+
+def manage_devices(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+    if request.user not in lab.get_admins():
+        return HttpResponseForbidden()
+
+    DeviceFormSet = modelformset_factory(Device, can_delete=True, extra=3)
+
+    if request.method == 'POST':
+        formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
+        for form in formset:
+            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
+            form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
+        if formset.is_valid():
+            formset.save()
+            return redirect(reverse('labs_manage_devices', kwargs={'lab_id': lab.id}))
+    else:
+        formset = DeviceFormSet(queryset=Device.objects.filter(pod__lab=lab))
+        for form in formset:
+            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
+            form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
+
+    return render(request, 'labs/manage_devices.html', {
+        'lab': lab,
+        'formset': formset,
+        'nav_labs': 'manage',
+        'nav_labs_manage': 'devices',
+        })

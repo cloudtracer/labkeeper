@@ -10,6 +10,9 @@ class Lab(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField('Public', default=True)
     is_active = models.BooleanField('Active', default=False)
+    profile = BleachField(blank=True)
+    last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
+    last_edited_by = models.ForeignKey(User, editable=False, null=True)
 
     class Meta:
         pass
@@ -28,19 +31,6 @@ class Lab(models.Model):
 
     def get_owners(self):
         return [m.user for m in self.memberships.filter(role=Membership.OWNER)]
-
-
-class LabProfile(models.Model):
-    lab = models.OneToOneField(Lab, related_name='profile')
-    last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
-    last_edited_by = models.ForeignKey(User, editable=False, null=True)
-    content = BleachField(blank=True)
-
-    class Meta:
-        pass
-
-    def __unicode__(self):
-        return "Profile for {0}".format(self.lab.name)
 
 
 class Pod(models.Model):
@@ -62,44 +52,8 @@ class Pod(models.Model):
         super(Pod, self).save(*args, **kwargs)
 
 
-class Device(models.Model):
-    ROUTER = 0
-    L2_SWITCH = 1
-    L3_SWITCH = 2
-    FIREWALL = 3
-    OTHER = 255
-    DEVICE_TYPES = (
-        (ROUTER, 'Router'),
-        (L2_SWITCH, 'Layer 2 Switch'),
-        (L3_SWITCH, 'Layer 3 Switch'),
-        (FIREWALL, 'Firewall'),
-        (OTHER, 'Other'),
-    )
-
-    pod = models.ForeignKey(Pod, related_name='devices')
-    name = models.CharField('Name', max_length=30)
-    slug = models.SlugField('Slug', max_length=30, editable=False)
-    type = models.PositiveSmallIntegerField('Type', choices=DEVICE_TYPES, default=ROUTER)
-    description = models.CharField('Description', max_length=80, blank=True)
-
-    class Meta:
-        ordering = ['name']
-        unique_together = (
-            ('pod', 'name'),
-            ('pod', 'slug'),
-        )
-
-    def __unicode__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
-        super(Device, self).save(*args, **kwargs)
-
-
 class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
-    devices = models.ManyToManyField(Device, through='ConsoleServerPort', blank=True)
     name = models.CharField('Name', max_length=30)
     fqdn = models.CharField('Domain name', max_length=50, unique=True, blank=True)
     ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
@@ -118,7 +72,6 @@ class ConsoleServer(models.Model):
 
 class ConsoleServerPort(models.Model):
     consoleserver = models.ForeignKey(ConsoleServer, related_name='ports')
-    device = models.OneToOneField(Device, related_name='port', blank=True, null=True)
     number = models.PositiveIntegerField('Port number')
     telnet_port = models.PositiveIntegerField('Telnet port', blank=True, null=True)
     ssh_port = models.PositiveIntegerField('SSH port', blank=True, null=True)
@@ -131,7 +84,43 @@ class ConsoleServerPort(models.Model):
         )
 
     def __unicode__(self):
-        return "{0} port {1}".format(self.consoleserver, self.number)
+        return "{0} - Port {1}".format(self.consoleserver, self.number)
+
+
+class Device(models.Model):
+    ROUTER = 0
+    L2_SWITCH = 1
+    L3_SWITCH = 2
+    FIREWALL = 3
+    OTHER = 255
+    DEVICE_TYPES = (
+        (ROUTER, 'Router'),
+        (L2_SWITCH, 'Layer 2 Switch'),
+        (L3_SWITCH, 'Layer 3 Switch'),
+        (FIREWALL, 'Firewall'),
+        (OTHER, 'Other'),
+    )
+
+    pod = models.ForeignKey(Pod, related_name='devices')
+    cs_port = models.OneToOneField(ConsoleServerPort, related_name='device', unique=True)
+    name = models.CharField('Name', max_length=30)
+    slug = models.SlugField('Slug', max_length=30, editable=False)
+    type = models.PositiveSmallIntegerField('Type', choices=DEVICE_TYPES, default=ROUTER)
+    description = models.CharField('Description', max_length=80, blank=True)
+
+    class Meta:
+        ordering = ['name']
+        unique_together = (
+            ('pod', 'name'),
+            ('pod', 'slug'),
+        )
+
+    def __unicode__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Device, self).save(*args, **kwargs)
 
 
 class Membership(models.Model):

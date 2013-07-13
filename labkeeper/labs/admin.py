@@ -4,15 +4,11 @@ from labs.models import *
 
 
 class LabAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_public')
-
-
-class LabProfileAdmin(admin.ModelAdmin):
-    list_display = ('lab', 'last_edited', 'last_edited_by')
+    list_display = ('name', 'is_public', 'is_active')
 
 
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'pod', 'port')
+    list_display = ('name', 'pod', 'cs_port')
     readonly_fields = ('slug',)
 
 
@@ -41,7 +37,6 @@ class MembershipAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Lab, LabAdmin)
-admin.site.register(LabProfile, LabProfileAdmin)
 admin.site.register(Pod, PodAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(ConsoleServerPort, ConsoleServerPortAdmin)

@@ -1,13 +1,13 @@
 from django import forms
 
-from labs.models import ConsoleServer, ConsoleServerPort, LabProfile, Pod
+from labs.models import ConsoleServer, ConsoleServerPort, Lab, Pod
 
 
-class LabProfileForm(forms.ModelForm):
+class LabForm(forms.ModelForm):
 
     class Meta:
-        model = LabProfile
-        fields = ['content']
+        model = Lab
+        fields = ['is_public', 'is_active', 'profile']
 
 
 class PodForm(forms.ModelForm):

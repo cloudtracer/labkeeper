@@ -8,19 +8,21 @@
         <legend>Devices</legend>
         {% csrf_token %}
           <div class="row-fluid">
-            <div class="span3"><label>Name</label></div>
+            <div class="span2"><label>Name</label></div>
             <div class="span2"><label>Pod</label></div>
+            <div class="span2"><label>Console Server Port</label></div>
             <div class="span2"><label>Type</label></div>
-            <div class="span4"><label>Description</label></div>
+            <div class="span3"><label>Description</label></div>
             <div class="span1"><label>Delete?</label></div>
           </div>
         {% for form in formset %}
           {{ form.id }}
           <div class="row-fluid control-group{% if form.errors %} error{% endif %}">
-            <div class="span3">{% render_field form.name class+="input-block-level" %}</div>
+            <div class="span2">{% render_field form.name class+="input-block-level" %}</div>
             <div class="span2">{% render_field form.pod class+="input-block-level" %}</div>
+            <div class="span2">{% render_field form.cs_port class+="input-block-level" %}</div>
             <div class="span2">{% render_field form.type class+="input-block-level" %}</div>
-            <div class="span4">{% render_field form.description class+="input-block-level" %}</div>
+            <div class="span3">{% render_field form.description class+="input-block-level" %}</div>
             <div class="span1">{% if formset.can_delete and form.initial %}{{ form.DELETE }}{% endif %}</div>
           </div>
         {% endfor %}
