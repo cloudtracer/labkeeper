@@ -15,7 +15,7 @@
       <tbody>
         {% for cs in cs_list %}
         <tr>
-          <td>{{ cs.name }}</td>
+          <td><a href="{% url 'labs_edit_consoleserver' cs.id %}">{{ cs.name }}</a></td>
           <td>{{ cs.port_count }}</td>
           <td>{{ cs.fqdn }}</td>
           <td>{{ cs.ip4_address }}</td>

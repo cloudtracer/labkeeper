@@ -1,0 +1,54 @@
+{% extends 'labs/_manage.html' %}
+{% load bootstrap_tags %}
+{% load widget_tweaks %}
+
+{% block lab_manage %}
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>{{ cs.name }}</legend>
+        {% csrf_token %}
+        {{ cs_form|as_bootstrap }}
+      </fieldset>
+      <div class="form-actions">
+        <a href="{% url 'labs_manage_consoleservers' cs.lab_id %}" class="btn">Go back</a>
+        <button type="submit" name="form" value="consoleserver" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+    <form class="form-horizontal" action="." method="post">
+      {{ port_formset.management_form }}
+      <fieldset>
+        <legend>Console Server Ports</legend>
+        {% csrf_token %}
+          <div class="row-fluid">
+            <div class="span3"><label>Number</label></div>
+            <div class="span3"><label>Telnet Port</label></div>
+            <div class="span3"><label>SSH Port</label></div>
+            <div class="span1"><label>Delete?</label></div>
+          </div>
+        {% for form in port_formset %}
+          {{ form.id }}
+          <div class="row-fluid control-group{% if form.errors %} error{% endif %}">
+            <div class="span3">
+              {% render_field form.number class+="input-block-level" %}
+              {% if form.number.errors %}<span class="help-inline">{{ form.number.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="span3">
+              {% render_field form.telnet_port class+="input-block-level" %}
+              {% if form.telnet_port.errors %}<span class="help-inline">{{ form.telnet_port.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="span3">
+              {% render_field form.ssh_port class+="input-block-level" %}
+              {% if form.ssh_port.errors %}<span class="help-inline">{{ form.ssh_port.errors.0 }}</span>{% endif %}
+            </div>
+            <div class="span1">
+              {% if port_formset.can_delete and form.initial %}{{ form.DELETE }}{% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </fieldset>
+      <div class="form-actions">
+        <a href="{% url 'labs_manage_consoleservers' cs.lab_id %}" class="btn">Go back</a>
+        <button type="submit" name="form" value="ports" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+{% endblock %}

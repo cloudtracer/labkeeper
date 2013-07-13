@@ -99,7 +99,7 @@ class Device(models.Model):
 
 class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
-    devices = models.ManyToManyField(Device, through='ConsoleServerPort')
+    devices = models.ManyToManyField(Device, through='ConsoleServerPort', blank=True)
     name = models.CharField('Name', max_length=30)
     fqdn = models.CharField('Domain name', max_length=50, unique=True, blank=True)
     ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
@@ -118,14 +118,16 @@ class ConsoleServer(models.Model):
 
 class ConsoleServerPort(models.Model):
     consoleserver = models.ForeignKey(ConsoleServer, related_name='ports')
-    device = models.OneToOneField(Device, related_name='port')
+    device = models.OneToOneField(Device, related_name='port', blank=True, null=True)
     number = models.PositiveIntegerField('Port number')
-    telnet_port = models.PositiveIntegerField('Telnet port', blank=True)
-    ssh_port = models.PositiveIntegerField('SSH port', blank=True)
+    telnet_port = models.PositiveIntegerField('Telnet port', blank=True, null=True)
+    ssh_port = models.PositiveIntegerField('SSH port', blank=True, null=True)
 
     class Meta:
         unique_together = (
             ('consoleserver', 'number'),
+            ('consoleserver', 'telnet_port'),
+            ('consoleserver', 'ssh_port'),
         )
 
     def __unicode__(self):
