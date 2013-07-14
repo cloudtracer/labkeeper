@@ -1,0 +1,28 @@
+{% extends '_base.html' %}
+
+{% block content %}
+{% include 'labs/_nav_header.html' %}
+<div class="row">
+  <div class="span8">
+    <h3>{{ lab }} Members</h3>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Member</th>
+          <th>Joined</th>
+          <th>Role</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in member_list %}
+        <tr>
+          <td>{{ m.user }}</td>
+          <td>{{ m.joined }}</td>
+          <td>{{ m.get_role_display }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

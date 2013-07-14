@@ -4,7 +4,7 @@
 {% include 'labs/_nav_header.html' %}
 <div class="row">
   <div class="span5">
-    <p>{{ lab.profile.content|safe }}</p>
+    <p>{{ lab.profile|safe }}</p>
   </div>
   <div class="span7">
     {% for pod in lab.pods.all %}
@@ -21,7 +21,7 @@
         <tr>
           <td>{{ device.name }}</td>
           <td>{{ device.get_type_display }}</td>
-          <td>{{ device.port }}</td>
+          <td>{{ device.cs_port }}</td>
         </tr>
       {% endfor %}</tbody>
     </table>

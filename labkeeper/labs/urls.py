@@ -2,7 +2,12 @@ from django.conf.urls import patterns, url
 
 urlpatterns = patterns('labs',
     url(r'^$', 'views.default', name='labs'),
+
+    # Lab info
     url(r'^(?P<lab_id>\d+)/$', 'views.lab', name='lab'),
+    url(r'^(?P<lab_id>\d+)/members/$', 'views.member_list', name='labs_member_list'),
+
+    # Lab/device management
     url(r'^(?P<lab_id>\d+)/manage/profile/$', 'views.manage_lab', name='labs_manage_lab'),
     url(r'^(?P<lab_id>\d+)/manage/devices/$', 'views.manage_devices', name='labs_manage_devices'),
     url(r'^(?P<lab_id>\d+)/manage/pods/$', 'views.manage_pods', name='labs_manage_pods'),

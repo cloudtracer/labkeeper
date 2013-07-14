@@ -96,6 +96,7 @@ class RadiusServer(server.Server):
         attrs = {
             'Session-Timeout':      r.time_left.seconds,
             'Termination-Action':   0,
+            'Framed-Filter-Id':     ':group_name=admin:',
             'Reply-Message':        "Welcome to {0} - Pod {1}! Reservartion ID: {2}\nYour reservation ends in {3}.".format(r.pod.lab, r.pod, r.id, str(r.time_left).split('.')[0]),
         }
         for k, v in attrs.items():
@@ -112,6 +113,18 @@ class RadiusServer(server.Server):
         login.save()
 
     # TODO: Implement accounting functionality?
+    def _HandleAcctPacket(self, pkt):
+        #server.Server._HandleAcctPacket(self, pkt)
+
+        print "Received an accounting request"
+        print "Attributes: "
+        for attr in pkt.keys():
+            print "%s: %s" % (attr, pkt[attr])
+
+        pkt.secret = 'secret1234'
+
+        reply=self.CreateReplyPacket(pkt)
+        self.SendReplyPacket(pkt.fd, reply)
 
 class Command(NoArgsCommand):
     help = "Starts the RADIUS daemon"

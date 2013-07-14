@@ -7,7 +7,7 @@ class LabForm(forms.ModelForm):
 
     class Meta:
         model = Lab
-        fields = ['is_public', 'is_active', 'profile']
+        fields = ['name', 'is_public', 'is_active', 'profile']
 
 
 class PodForm(forms.ModelForm):

@@ -25,6 +25,17 @@ def lab(request, lab_id):
         })
 
 
+def member_list(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+
+    return render(request, 'labs/member_list.html', {
+        'lab': lab,
+        'member_list': lab.memberships.all(),
+        'nav_labs': 'members',
+        })
+
+
 def manage_lab(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)

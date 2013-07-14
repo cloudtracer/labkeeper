@@ -1,5 +1,6 @@
 <h1>{{ lab }}</h1>
 <ul class="nav nav-tabs">
   <li{% ifequal nav_labs "dashboard" %} class="active"{% endifequal %}><a href="{% url 'lab' lab.id %}">Dashboard</a></li>
+  <li{% ifequal nav_labs "members" %} class="active"{% endifequal %}><a href="{% url 'labs_member_list' lab.id %}">Members</a></li>
   {% if request.user in lab.get_admins %}<li{% ifequal nav_labs "manage" %} class="active"{% endifequal %}><a href="{% url 'labs_manage_lab' lab.id %}">Manage</a></li>{% endif %}
 </ul>

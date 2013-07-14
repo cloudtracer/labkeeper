@@ -67,7 +67,7 @@ ATTRIBUTE	Framed-Protocol		7	integer
 ATTRIBUTE	Framed-IP-Address	8	ipaddr
 ATTRIBUTE	Framed-IP-Netmask	9	ipaddr
 ATTRIBUTE	Framed-Routing		10	integer
-ATTRIBUTE	Filter-Id		11	string
+ATTRIBUTE	Framed-Filter-Id	11	string
 ATTRIBUTE	Framed-MTU		12	integer
 ATTRIBUTE	Framed-Compression	13	integer
 ATTRIBUTE	Login-IP-Host		14	ipaddr

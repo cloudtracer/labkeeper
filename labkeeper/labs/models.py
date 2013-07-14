@@ -8,8 +8,8 @@ from django_bleach.models import BleachField
 
 class Lab(models.Model):
     name = models.CharField('Name', max_length=80, unique=True)
-    is_public = models.BooleanField('Public', default=True)
-    is_active = models.BooleanField('Active', default=False)
+    is_public = models.BooleanField('Public', default=True, help_text="This lab is viewable by everyone")
+    is_active = models.BooleanField('Active', default=False, help_text="This lab is open for new reservations")
     profile = BleachField(blank=True)
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
@@ -136,6 +136,7 @@ class Membership(models.Model):
     user = models.ForeignKey(User, related_name='memberships')
     lab = models.ForeignKey(Lab, related_name='memberships')
     role = models.PositiveSmallIntegerField('Role', choices=MEMBERSHIP_ROLES, default=MEMBER)
+    joined = models.DateField('Joined', auto_now_add=True)
 
     class Meta:
         unique_together = (('user', 'lab'),)
