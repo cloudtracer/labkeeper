@@ -1,10 +1,11 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
+from dateutil import rrule
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
-from labs.models import Pod
+from labs.models import Lab, Pod
 
 
 class Reservation(models.Model):
@@ -35,3 +36,40 @@ class Reservation(models.Model):
             return self.end_time - timezone.now()
         return None
     time_left = property(_get_time_left)
+
+    # Split total duration into hours (before, after) midnight
+    # for schedule presentation
+    def _get_midnight_split(self):
+        x = 24 - self.start_time.hour
+        if x < self.duration:
+            return (x, self.duration - x)
+        else:
+            return (self.duration, 0)
+    midnight_split = property(_get_midnight_split)
+
+
+class Schedule:
+
+    def __init__(self, lab, start_day, days=7):
+
+        # Compile index of Pods for this Lab
+        self.pod_index = {}
+        i = 1
+        for pod in lab.pods.all():
+            self.pod_index[pod.id] = i
+            i += 1
+
+        # Build the schedule skeleton of 24 hours * 7 days * n Pods
+        self.schedule = {}
+        for h in range(24):
+            self.schedule[h] = {}
+            for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(start_day, time(0, 0)), count=days):
+                self.schedule[h][d.date().day] = {}
+                for p, i in self.pod_index.items():
+                    self.schedule[h][d.date().day][i] = None
+
+        # Assign Reservations to schedule
+        for r in Reservation.objects.filter(pod__lab=lab):
+            self.schedule[r.start_time.hour][r.start_time.day][self.pod_index[r.pod_id]] = r
+            if r.midnight_split:
+                self.schedule[0][r.start_time.day+1][self.pod_index[r.pod_id]] = r

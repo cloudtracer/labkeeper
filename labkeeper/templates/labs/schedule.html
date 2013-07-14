@@ -1,0 +1,139 @@
+{% extends '_base.html' %}
+
+{% block headextra %}
+<style type="text/css">
+div.schedrow {
+	clear: left;
+}
+div.cell {
+	border-bottom: 1px solid #c0c0c0;
+	border-right: 1px solid #c0c0c0;
+	display: block;
+	float: left;
+	height: 24px;
+	width: 124px; /* (pod.width + pod.left-padding) * pod_count + 4 */
+}
+div.day {
+	border-right: 1px solid #ffffff;
+	text-align: center;
+}
+div.hour {
+	border-bottom: none;
+    font-size: 80%;
+	padding-right: 4px;
+	text-align: right;
+	width: 60px;
+}
+div.pod {
+	float: left;
+	height: 20px;
+	padding: 4px 0px 0px 4px;
+	position: relative;
+}
+div.podof4 {
+	width: 26px;
+}
+div.podof3 {
+	width: 36px;
+}
+div.podof2 {
+	width: 56px;
+}
+div.podof1 {
+	width: 116px;
+}
+div.pod1 div.reservation {
+	background-color: blue;
+}
+div.pod2 div.reservation {
+	background-color: orange;
+}
+div.pod3 div.reservation {
+	background-color: green;
+}
+div.pod4 div.reservation {
+	background-color: red;
+}
+div.reservation {
+	border-radius: 8px;
+	color: #ffffff;
+	display: block;
+	float: left;
+	width: 100%;
+}
+div.reservation a {
+	display: block;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	z-index: 1000;
+}
+div.hours1 {
+	height: 17px;	/* 1*25-8 */
+}
+div.hours2 {
+	height: 42px;	/* 2*25-8 */
+}
+div.hours3 {
+	height: 67px;	/* 3*25-8 */
+}
+div.hours4 {
+	height: 92px;	/* 4*25-8 */
+}
+div.hours5 {
+	height: 117px;	/* 5*25-8 */
+}
+div.hours6 {
+	height: 142px;	/* 6*25-8 */
+}
+div.wrap {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+div.unwrap {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include 'labs/_nav_header.html' %}
+<div class="container">
+  <div class="row">
+    <div class="span2">
+      <p><i class="icon-exclamation-sign"></i> Times are UTC (for now)</p>
+    </div>
+    <div class="span10">
+      <div id="schedule">
+        <div class="schedrow">
+          <div class="cell day hour"></div>
+          <div class="cell day">Sun</div>
+          <div class="cell day">Mon</div>
+          <div class="cell day">Tue</div>
+          <div class="cell day">Wed</div>
+          <div class="cell day">Thu</div>
+          <div class="cell day">Fri</div>
+          <div class="cell day">Sat</div>
+        </div>
+        {% for hour, days in schedule.items %}
+        <div class="schedrow">
+          <div class="cell hour">{{ hour }}:00</div>
+          {% for day, pods in days.items %}
+          <div class="cell">
+            {% for pod, r in pods.items %}
+            <div class="pod podof{{ pods|length }} pod{{ pod }}">
+              {% if r %}
+              <div class="reservation hours{% ifequal day r.start_time.day %}{{ r.midnight_split.0 }}{% if r.midnight_split.1 %} wrap{% endif %}{% else %}{{ r.midnight_split.1 }} unwrap{% endifequal %}"><a href="#"></a></div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

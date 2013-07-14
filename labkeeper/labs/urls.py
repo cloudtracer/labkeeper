@@ -5,6 +5,7 @@ urlpatterns = patterns('labs',
 
     # Lab info
     url(r'^(?P<lab_id>\d+)/$', 'views.lab', name='lab'),
+    url(r'^(?P<lab_id>\d+)/schedule/$', 'views.schedule', name='labs_schedule'),
     url(r'^(?P<lab_id>\d+)/members/$', 'views.member_list', name='labs_member_list'),
 
     # Lab/device management

@@ -1,8 +1,12 @@
+from datetime import date
+
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+
+from scheduler.models import Schedule
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
 from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, PodForm
@@ -22,6 +26,19 @@ def lab(request, lab_id):
     return render(request, 'labs/lab.html', {
         'lab': lab,
         'nav_labs': 'dashboard',
+        })
+
+
+def schedule(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+
+    s = Schedule(lab, date.today())
+
+    return render(request, 'labs/schedule.html', {
+        'lab': lab,
+        'schedule': s.schedule,
+        'nav_labs': 'schedule',
         })
 
 
