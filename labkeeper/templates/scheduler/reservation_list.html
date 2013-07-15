@@ -1,0 +1,28 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Duration</th>
+      <th>User</th>
+      <th>Lab</th>
+      <th>Pod</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for rsv in rsv_list %}
+    <tr>
+      <td><a href="{{ rsv.get_absolute_url }}">{{ rsv.start_time }}</a></td>
+      <td>{{ rsv.duration }} hours</td>
+      <td>{{ rsv.user }}</td>
+      <td>{{ rsv.pod.lab }}</td>
+      <td>{{ rsv.pod }}</td>
+      <td>{{ rsv.created_time }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

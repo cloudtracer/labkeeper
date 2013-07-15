@@ -124,7 +124,7 @@ div.unwrap {
             {% for pod, r in pods.items %}
             <div class="pod podof{{ pods|length }} pod{{ pod }}">
               {% if r %}
-              <div class="reservation hours{% ifequal day r.start_time.day %}{{ r.midnight_split.0 }}{% if r.midnight_split.1 %} wrap{% endif %}{% else %}{{ r.midnight_split.1 }} unwrap{% endifequal %}"><a href="#"></a></div>
+              <div class="reservation hours{% ifequal day r.start_time.day %}{{ r.midnight_split.0 }}{% if r.midnight_split.1 %} wrap{% endif %}{% else %}{{ r.midnight_split.1 }} unwrap{% endifequal %}"><a href="{{ r.get_absolute_url }}"></a></div>
               {% endif %}
             </div>
             {% endfor %}

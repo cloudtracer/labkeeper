@@ -142,4 +142,4 @@ class Membership(models.Model):
         unique_together = (('user', 'lab'),)
 
     def __unicode__(self):
-        return "{0} is a member of {1}".format(self.user, self.lab)
+        return "{0} is a(n) {1} of {2}".format(self.user, self.get_role_display(), self.lab)

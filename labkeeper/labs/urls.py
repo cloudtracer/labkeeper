@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, url
 
 urlpatterns = patterns('labs',
+    # Lab list
     url(r'^$', 'views.default', name='labs'),
 
     # Lab info

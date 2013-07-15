@@ -21,7 +21,7 @@ def default(request):
 
 def lab(request, lab_id):
 
-    lab = get_object_or_404(Lab, id=lab_id)
+    lab = get_object_or_404(Lab.objects.prefetch_related('pods__devices'), id=lab_id)
 
     return render(request, 'labs/lab.html', {
         'lab': lab,

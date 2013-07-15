@@ -2,6 +2,7 @@ from datetime import datetime, time, timedelta
 from dateutil import rrule
 
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 
@@ -25,6 +26,9 @@ class Reservation(models.Model):
 
     def __unicode__(self):
         return "{0} reserved by {1} at {2}".format(self.pod, self.user, self.start_time)
+
+    def get_absolute_url(self):
+        return reverse('reservation', kwargs={'rsv_id': self.id})
 
     def save(self, *args, **kwargs):
         self.end_time = self.start_time + timedelta(hours=self.duration)

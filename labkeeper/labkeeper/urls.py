@@ -6,7 +6,11 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^$', 'labkeeper.views.default', name='home'),
 
+    # Native apps
     url(r'^labs/', include('labs.urls')),
+    url(r'^reservations/', include('scheduler.urls')),
+
+    # TinyMCE
     url(r'^tinymce/', include('tinymce.urls')),
 
     # Admin interface

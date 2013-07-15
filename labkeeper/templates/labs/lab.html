@@ -17,13 +17,15 @@
           <th>Port</th>
         </tr>
       </thead>
-      <tbody>{% for device in pod.devices.all %}
+      <tbody>
+      {% for device in pod.devices.all %}
         <tr>
           <td>{{ device.name }}</td>
           <td>{{ device.get_type_display }}</td>
           <td>{{ device.cs_port }}</td>
         </tr>
-      {% endfor %}</tbody>
+      {% endfor %}
+      </tbody>
     </table>
     {% endfor %}
   </div>
