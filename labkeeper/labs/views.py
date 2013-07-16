@@ -38,7 +38,7 @@ def schedule(request, lab_id):
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
-        'schedule': s.schedule,
+        's': s,
         'nav_labs': 'schedule',
         })
 
@@ -182,6 +182,7 @@ def edit_consoleserver(request, cs_id):
         cs_form = ConsoleServerForm(request.POST, instance=cs)
         if cs_form.is_valid():
             cs_form.save()
+            messages.success(request, "Your changes have been saved.")
     else:
         cs_form = ConsoleServerForm(instance=cs)
 

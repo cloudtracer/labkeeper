@@ -21,7 +21,7 @@
           <td>{{ pod.devices.all|join:", " }}</td>
           <td>
             <a href="{% url 'labs_edit_pod' pod.id %}">edit</a>
-            {% if not pod.devices.all %}| <a href="{% url 'labs_delete_pod' pod.id %}" class="text-error">delete</a>{% endif %}
+            {% if not pod.devices.all %}| <a href="{% url 'labs_delete_pod' pod.id %}" class="text-error" onclick="return confirm('Delete pod {{ pod.name }}?')">delete</a>{% endif %}
           </td>
         </tr>
         {% endfor %}

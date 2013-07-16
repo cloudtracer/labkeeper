@@ -21,7 +21,7 @@
           <td>{{ cs.ip4_address }}</td>
           <td>
             <a href="{% url 'labs_edit_consoleserver' cs.id %}">edit</a>
-            {% if not cs.port_count %}| <a href="{% url 'labs_delete_consoleserver' cs.id %}" class="text-error">delete</a>{% endif %}
+            {% if not cs.port_count %}| <a href="{% url 'labs_delete_consoleserver' cs.id %}" class="text-error" onclick="return confirm('Delete console server {{ cs.name }}?')">delete</a>{% endif %}
           </td>
         </tr>
         {% endfor %}

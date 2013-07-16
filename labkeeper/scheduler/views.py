@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,8 +22,8 @@ def delete_reservation(request, rsv_id):
         return HttpResponseForbidden()
 
     rsv.delete()
+    messages.info(request, "Your reservation has been deleted.")
 
-    # TODO: Redirect to user's "my reservations" page
     return redirect(reverse('my_reservations'))
 
 

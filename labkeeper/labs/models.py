@@ -62,14 +62,12 @@ class Pod(models.Model):
 class ConsoleServer(models.Model):
     lab = models.ForeignKey(Lab, related_name='consoleservers')
     name = models.CharField('Name', max_length=30)
-    fqdn = models.CharField('Domain name', max_length=50, unique=True, blank=True)
-    ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4')
+    fqdn = models.CharField('Domain name', max_length=50, unique=True, blank=True, null=True)
+    ip4_address = models.GenericIPAddressField('IPv4 address', protocol='IPv4', unique=True, blank=True, null=True)
     secret = models.CharField('Shared secret', max_length=30, default='')
 
     class Meta:
         unique_together = (
-            ('lab', 'name'),
-            ('lab', 'fqdn'),
             ('lab', 'ip4_address'),
         )
 
@@ -146,7 +144,9 @@ class Membership(models.Model):
     joined = models.DateField('Joined', auto_now_add=True)
 
     class Meta:
-        unique_together = (('user', 'lab'),)
+        unique_together = (
+            ('user', 'lab'),
+        )
 
     def __unicode__(self):
         return "{0} is a(n) {1} of {2}".format(self.user, self.get_role_display(), self.lab)

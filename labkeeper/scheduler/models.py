@@ -56,6 +56,8 @@ class Schedule:
 
     def __init__(self, lab, start_day, days=7):
 
+        self.start_day = start_day
+
         # Compile index of Pods for this Lab
         self.pod_index = {}
         i = 1
@@ -77,3 +79,6 @@ class Schedule:
             self.schedule[r.start_time.hour][r.start_time.day][self.pod_index[r.pod_id]] = r
             if r.midnight_split:
                 self.schedule[0][r.start_time.day+1][self.pod_index[r.pod_id]] = r
+
+    def get_weekdays(self):
+        return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]

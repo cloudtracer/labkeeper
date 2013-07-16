@@ -3,88 +3,93 @@
 {% block headextra %}
 <style type="text/css">
 div.schedrow {
-	clear: left;
+  clear: left;
+}
+div.schedend {
+  clear: both;
+  padding-top: 6px;
+  text-align: center;
 }
 div.cell {
-	border-bottom: 1px solid #c0c0c0;
-	border-right: 1px solid #c0c0c0;
-	display: block;
-	float: left;
-	height: 24px;
-	width: 124px; /* (pod.width + pod.left-padding) * pod_count + 4 */
+  border-bottom: 1px solid #c0c0c0;
+  border-right: 1px solid #c0c0c0;
+  display: block;
+  float: left;
+  height: 24px;
+  width: 112px; /* (pod.width + pod.left-padding) * pod_count + 4 */
 }
 div.day {
-	border-right: 1px solid #ffffff;
-	text-align: center;
+  border-right: 1px solid #ffffff;
+  text-align: center;
 }
 div.hour {
-	border-bottom: none;
-    font-size: 80%;
-	padding-right: 4px;
-	text-align: right;
-	width: 60px;
+  border-bottom: none;
+  font-size: 80%;
+  padding-right: 4px;
+  text-align: right;
+  width: 50px;
 }
 div.pod {
-	float: left;
-	height: 20px;
-	padding: 4px 0px 0px 4px;
-	position: relative;
+  float: left;
+  height: 20px;
+  padding: 4px 0px 0px 4px;
+  position: relative;
 }
 div.podof4 {
-	width: 26px;
+  width: 23px;
 }
 div.podof3 {
-	width: 36px;
+  width: 32px;
 }
 div.podof2 {
-	width: 56px;
+  width: 50px;
 }
 div.podof1 {
-	width: 116px;
+  width: 104px;
 }
 div.pod1 div.reservation {
-	background-color: blue;
+  background-color: blue;
 }
 div.pod2 div.reservation {
-	background-color: orange;
+  background-color: orange;
 }
 div.pod3 div.reservation {
-	background-color: green;
+  background-color: green;
 }
 div.pod4 div.reservation {
-	background-color: red;
+  background-color: red;
 }
 div.reservation {
-	border-radius: 8px;
-	color: #ffffff;
-	display: block;
-	float: left;
-	width: 100%;
+  border-radius: 8px;
+  color: #ffffff;
+  display: block;
+  float: left;
+  width: 100%;
 }
 div.reservation a {
-	display: block;
-	position: relative;
-	height: 100%;
-	width: 100%;
-	z-index: 1000;
+  display: block;
+  position: relative;
+  height: 100%;
+  width: 100%;
+  z-index: 1000;
 }
 div.hours1 {
-	height: 17px;	/* 1*25-8 */
+  height: 17px;	/* 1*25-8 */
 }
 div.hours2 {
-	height: 42px;	/* 2*25-8 */
+  height: 42px;	/* 2*25-8 */
 }
 div.hours3 {
-	height: 67px;	/* 3*25-8 */
+  height: 67px;	/* 3*25-8 */
 }
 div.hours4 {
-	height: 92px;	/* 4*25-8 */
+  height: 92px;	/* 4*25-8 */
 }
 div.hours5 {
-	height: 117px;	/* 5*25-8 */
+  height: 117px;	/* 5*25-8 */
 }
 div.hours6 {
-	height: 142px;	/* 6*25-8 */
+  height: 142px;	/* 6*25-8 */
 }
 div.wrap {
   border-bottom-left-radius: 0;
@@ -101,22 +106,18 @@ div.unwrap {
 {% include 'labs/_nav_header.html' %}
 <div class="container">
   <div class="row">
-    <div class="span2">
-      <p><i class="icon-exclamation-sign"></i> Times are UTC (for now)</p>
+    <div class="span3">
+      <p>Reservation form goes here</p>
     </div>
-    <div class="span10">
+    <div class="span9">
       <div id="schedule">
         <div class="schedrow">
           <div class="cell day hour"></div>
-          <div class="cell day">Sun</div>
-          <div class="cell day">Mon</div>
-          <div class="cell day">Tue</div>
-          <div class="cell day">Wed</div>
-          <div class="cell day">Thu</div>
-          <div class="cell day">Fri</div>
-          <div class="cell day">Sat</div>
+          {% for d in s.get_weekdays %}
+          <div class="cell day">{{ d }}</div>
+          {% endfor %}
         </div>
-        {% for hour, days in schedule.items %}
+        {% for hour, days in s.schedule.items %}
         <div class="schedrow">
           <div class="cell hour">{{ hour }}:00</div>
           {% for day, pods in days.items %}
@@ -133,6 +134,7 @@ div.unwrap {
         </div>
         {% endfor %}
       </div>
+      <div class="schedend"><i class="icon-exclamation-sign"></i> Times are UTC (for now)</div>
       </div>
     </div>
   </div>
