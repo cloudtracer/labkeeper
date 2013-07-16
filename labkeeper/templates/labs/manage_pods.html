@@ -6,6 +6,8 @@
       <thead>
         <tr>
           <th>Pod</th>
+          <th>Min Resv.</th>
+          <th>Max Resv.</th>
           <th>Devices</th>
           <th>Actions</th>
         </tr>
@@ -13,9 +15,14 @@
       <tbody>
         {% for pod in pod_list %}
         <tr>
-          <td>{{ pod }}</td>
+          <td><a href="{% url 'labs_edit_pod' pod.id %}">{{ pod }}</a></td>
+          <td>{{ pod.min_reservation }}</td>
+          <td>{{ pod.max_reservation }}</td>
           <td>{{ pod.devices.all|join:", " }}</td>
-          <td>{% if not pod.devices.all %}<a href="{% url 'labs_delete_pod' pod.id %}" class="text-error">delete</a>{% endif %}</td>
+          <td>
+            <a href="{% url 'labs_edit_pod' pod.id %}">edit</a>
+            {% if not pod.devices.all %}| <a href="{% url 'labs_delete_pod' pod.id %}" class="text-error">delete</a>{% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

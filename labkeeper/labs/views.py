@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.forms.models import modelformset_factory, inlineformset_factory
@@ -53,10 +54,10 @@ def member_list(request, lab_id):
         })
 
 
-def manage_lab(request, lab_id):
+def edit_lab(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_admins():
+    if request.user not in lab.get_owners():
         return HttpResponseForbidden()
 
     # Processing a submitted form
@@ -66,11 +67,12 @@ def manage_lab(request, lab_id):
             p = form.save()
             p.last_edited_by = request.user
             p.save()
-            return redirect(reverse('labs_manage_lab', kwargs={'lab_id': lab.id}))
+            messages.success(request, "Your changes have been saved.")
+            return redirect(reverse('labs_edit_lab', kwargs={'lab_id': lab.id}))
     else:
         form = LabForm(instance=lab)
 
-    return render(request, 'labs/manage_lab.html', {
+    return render(request, 'labs/edit_lab.html', {
         'lab': lab,
         'form': form,
         'nav_labs': 'manage',
@@ -81,7 +83,7 @@ def manage_lab(request, lab_id):
 def manage_pods(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_admins():
+    if request.user not in lab.get_owners():
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -103,15 +105,41 @@ def manage_pods(request, lab_id):
         })
 
 
+def edit_pod(request, pod_id):
+
+    pod = get_object_or_404(Pod, id=pod_id)
+    if request.user not in pod.lab.get_owners():
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        pod_form = PodForm(request.POST, instance=pod)
+        if pod_form.is_valid():
+            pod_form.save()
+            messages.success(request, "Your changes have been saved.")
+    else:
+        pod_form = PodForm(instance=pod)
+
+    return render(request, 'labs/edit_pod.html', {
+        'lab': pod.lab,
+        'pod': pod,
+        'pod_form': pod_form,
+        'nav_labs': 'manage',
+        'nav_labs_manage': 'pods',
+        })
+
+
 def delete_pod(request, pod_id):
 
     pod = get_object_or_404(Pod, id=pod_id)
-    if request.user not in pod.lab.get_admins():
+    if request.user not in pod.lab.get_owners():
         return HttpResponseForbidden()
 
-    # TODO: Prevent deletion of Pods which still have one or more Devices assigned
-
-    pod.delete()
+    # Don't delete a Pod which has one or more Devices assigned
+    if pod.devices.all():
+        messages.error(request, "Cannot delete a pod which has devices assigned.")
+    else:
+        pod.delete()
+        messages.success(request, "Pod {0} has been deleted.".format(pod.name))
 
     return redirect(reverse('labs_manage_pods', kwargs={'lab_id': pod.lab.id}))
 
@@ -119,7 +147,7 @@ def delete_pod(request, pod_id):
 def manage_consoleservers(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_admins():
+    if request.user not in lab.get_owners():
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -144,7 +172,7 @@ def manage_consoleservers(request, lab_id):
 def edit_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
-    if request.user not in cs.lab.get_admins():
+    if request.user not in cs.lab.get_owners():
         return HttpResponseForbidden()
 
     ConsoleServerPortFormSet = inlineformset_factory(ConsoleServer, ConsoleServerPort, form=ConsoleServerPortForm, extra=4, max_num=48)
@@ -179,12 +207,15 @@ def edit_consoleserver(request, cs_id):
 def delete_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
-    if request.user not in cs.lab.get_admins():
+    if request.user not in cs.lab.get_owners():
         return HttpResponseForbidden()
 
-    # TODO: Prevent deletion of ConsoleServers which still have one or more ConsoleServerPorts assigned
-
-    cs.delete()
+    # Don't delete a ConsoleServer with one or more Devices assigned
+    if Device.objects.filter(cs_port__consoleserver=cs):
+        messages.error(request, "Cannot delete a console server which has devices assigned.")
+    else:
+        cs.delete()
+        messages.success(request, "Console server {0} has been deleted.".format(cs.name))
 
     return redirect(reverse('labs_manage_consoleservers', kwargs={'lab_id': cs.lab.id}))
 
@@ -192,7 +223,7 @@ def delete_consoleserver(request, cs_id):
 def manage_devices(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_admins():
+    if request.user not in lab.get_owners():
         return HttpResponseForbidden()
 
     DeviceFormSet = modelformset_factory(Device, can_delete=True, extra=3)

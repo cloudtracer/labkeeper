@@ -19,7 +19,10 @@
           <td>{{ cs.port_count }}</td>
           <td>{{ cs.fqdn }}</td>
           <td>{{ cs.ip4_address }}</td>
-          <td>{% if not cs.port_count %}<a href="{% url 'labs_delete_consoleserver' cs.id %}" class="text-error">delete</a>{% endif %}</td>
+          <td>
+            <a href="{% url 'labs_edit_consoleserver' cs.id %}">edit</a>
+            {% if not cs.port_count %}| <a href="{% url 'labs_delete_consoleserver' cs.id %}" class="text-error">delete</a>{% endif %}
+          </td>
         </tr>
         {% endfor %}
       </tbody>

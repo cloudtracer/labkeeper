@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 
@@ -37,6 +38,12 @@ class Pod(models.Model):
     lab = models.ForeignKey(Lab, related_name='pods')
     name = models.CharField('Name', max_length=30, default='')
     slug = models.SlugField('Slug', max_length=30, editable=False)
+    min_reservation = models.PositiveSmallIntegerField('Minimum reservation', default=2,
+                                                       validators=[MinValueValidator(1), MaxValueValidator(24)],
+                                                       help_text="Minimum reservation time (in hours)")
+    max_reservation = models.PositiveSmallIntegerField('Maximum reservation', default=6,
+                                                       validators=[MinValueValidator(1), MaxValueValidator(24)],
+                                                       help_text="Maximum reservation time (in hours)")
 
     class Meta:
         ordering = ['name']

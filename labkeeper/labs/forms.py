@@ -14,7 +14,12 @@ class PodForm(forms.ModelForm):
 
     class Meta:
         model = Pod
-        fields = ['name']
+        fields = ['name', 'min_reservation', 'max_reservation']
+
+    def __init__(self, *args, **kwargs):
+        super(PodForm, self).__init__(*args, **kwargs)
+        self.fields['min_reservation'].widget.attrs['class'] = 'input-mini'
+        self.fields['max_reservation'].widget.attrs['class'] = 'input-mini'
 
 
 class ConsoleServerForm(forms.ModelForm):

@@ -151,7 +151,8 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # Bleach
-BLEACH_ALLOWED_TAGS = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'i', 'li', 'ol', 'p', 'pre', 'strong', 'sub', 'sup', 'ul']
+BLEACH_ALLOWED_TAGS = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'i', 'li', 'ol',
+                       'p', 'pre', 'strong', 'sub', 'sup', 'ul']
 BLEACH_ALLOWED_ATTRIBUTES = {
     'a': ['href', 'title'],
     'acronym': ['title'],
