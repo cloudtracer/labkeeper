@@ -50,21 +50,31 @@ class Reservation(models.Model):
 
     # Split total duration into hours (before, after) midnight
     # for schedule presentation
-    def _get_midnight_split(self):
-        x = 24 - self.start_time.hour
+    def get_midnight_split(self, timezone):
+        start_time = self.start_time.astimezone(tz=timezone)
+        x = 24 - start_time.hour
         if x < self.duration:
             return (x, self.duration - x)
         else:
-            return (self.duration, 0)
-    midnight_split = property(_get_midnight_split)
+            return None
+
+
+class ScheduleBlock:
+
+    def __init__(self, duration, url, wrap=False, unwrap=False):
+        self.duration = duration
+        self.url = url
+        self.wrap = wrap
+        self.unwrap = unwrap
 
 
 class Schedule:
 
-    def __init__(self, lab, start_day, days=7):
+    def __init__(self, lab, start_day, timezone=None, days=7):
 
         self.start_day = start_day
-        
+        self.timezone = timezone or pytz.timezone('UTC')
+
         # Compile index of Pods for this Lab
         self.pod_index = {}
         i = 1
@@ -84,9 +94,14 @@ class Schedule:
         # Assign Reservations to schedule
         for r in Reservation.objects.filter(lab=lab):
             for p in r.pods.all():
-                self.schedule[r.start_time.hour][r.start_time.day][self.pod_index[p.id]] = r
-                if r.midnight_split:
-                    self.schedule[0][r.start_time.day+1][self.pod_index[p.id]] = r
+                start_time = r.start_time.astimezone(tz=self.timezone)
+                midnight_split = r.get_midnight_split(self.timezone)
+                if midnight_split:
+                    # Create two ScheduleBocks (one for each day) and wrap them
+                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), wrap=True)
+                    self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
+                else:
+                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(r.duration, r.get_absolute_url())
 
     def get_weekdays(self):
         return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]

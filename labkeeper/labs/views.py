@@ -1,3 +1,4 @@
+import pytz
 from datetime import date, datetime
 
 from django.contrib import messages
@@ -34,11 +35,13 @@ def schedule(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
-    s = Schedule(lab, date.today())
+    # Generate the Lab's schedule for the next seven days
+    s = Schedule(lab, date.today(), timezone=request.session.get('django_timezone'))
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
         's': s,
+        'current_time': datetime.now(),
         'nav_labs': 'schedule',
         })
 

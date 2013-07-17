@@ -1,4 +1,5 @@
 {% extends '_base.html' %}
+{% load tz %}
 
 {% block headextra %}
 <style type="text/css">
@@ -50,26 +51,26 @@ div.podof2 {
 div.podof1 {
   width: 104px;
 }
-div.pod1 div.reservation {
+div.pod1 div.block {
   background-color: blue;
 }
-div.pod2 div.reservation {
+div.pod2 div.block {
   background-color: orange;
 }
-div.pod3 div.reservation {
+div.pod3 div.block {
   background-color: green;
 }
-div.pod4 div.reservation {
+div.pod4 div.block {
   background-color: red;
 }
-div.reservation {
+div.block {
   border-radius: 8px;
   color: #ffffff;
   display: block;
   float: left;
   width: 100%;
 }
-div.reservation a {
+div.block a {
   display: block;
   position: relative;
   height: 100%;
@@ -125,10 +126,10 @@ div.unwrap {
           <div class="cell hour">{{ hour }}:00</div>
           {% for day, pods in days.items %}
           <div class="cell">
-            {% for pod, r in pods.items %}
+            {% for pod, block in pods.items %}
             <div class="pod podof{{ pods|length }} pod{{ pod }}">
-              {% if r %}
-              <div class="reservation hours{% ifequal day r.start_time.day %}{{ r.midnight_split.0 }}{% if r.midnight_split.1 %} wrap{% endif %}{% else %}{{ r.midnight_split.1 }} unwrap{% endifequal %}"><a href="{{ r.get_absolute_url }}"></a></div>
+              {% if block %}
+              <div class="block hours{{ block.duration }}{% if block.wrap %} wrap{% elif block.unwrap %} unwrap{% endif %}"><a href="{{ block.url }}"></a></div>
               {% endif %}
             </div>
             {% endfor %}
@@ -137,7 +138,7 @@ div.unwrap {
         </div>
         {% endfor %}
       </div>
-      <div class="schedend"><i class="icon-exclamation-sign"></i> Times are UTC (for now)</div>
+      <div class="schedend">Current time: {{ current_time|localtime }} {{ TIME_ZONE }}</div>
       </div>
     </div>
   </div>
