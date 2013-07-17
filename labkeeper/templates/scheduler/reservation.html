@@ -5,11 +5,11 @@
   <div class="span4">
     <div class="row-fluid">
       <div class="span3">Lab</div>
-      <div class="span9"><a href="{{ rsv.pod.lab.get_absolute_url }}">{{ rsv.pod.lab }}</a></div>
+      <div class="span9"><a href="{{ rsv.lab.get_absolute_url }}">{{ rsv.lab }}</a></div>
     </div>
     <div class="row-fluid">
-      <div class="span3">Pod</div>
-      <div class="span9">{{ rsv.pod }}</div>
+      <div class="span3">Pod(s)</div>
+      <div class="span9">{{ rsv.get_pods }}</div>
     </div>
     <div class="row-fluid">
       <div class="span3">User</div>

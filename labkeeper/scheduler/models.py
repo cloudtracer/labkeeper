@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime, time, timedelta
 from dateutil import rrule
 
@@ -13,7 +14,8 @@ class Reservation(models.Model):
     """A reservation made by a User for a Pod."""
 
     user = models.ForeignKey(User, related_name='reservations')
-    pod = models.ForeignKey(Pod, related_name='reservations')
+    lab = models.ForeignKey(Lab, related_name='reservations')
+    pods = models.ManyToManyField(Pod, related_name='reservations')
     created_time = models.DateTimeField('Time created', auto_now_add=True)
     created_ip_address = models.GenericIPAddressField('IP of creator', blank=True, null=True)
     start_time = models.DateTimeField('Start time')
@@ -25,7 +27,7 @@ class Reservation(models.Model):
         pass
 
     def __unicode__(self):
-        return "{0} reserved by {1} at {2}".format(self.pod, self.user, self.start_time)
+        return "{0} reserved by {1} at {2}".format(self.get_pods(), self.user, self.start_time)
 
     def get_absolute_url(self):
         return reverse('reservation', kwargs={'rsv_id': self.id})
@@ -33,6 +35,11 @@ class Reservation(models.Model):
     def save(self, *args, **kwargs):
         self.end_time = self.start_time + timedelta(hours=self.duration)
         super(Reservation, self).save(*args, **kwargs)
+
+    # For admin list_display
+    def get_pods(self):
+        return ', '.join([p.name for p in self.pods.all()])
+    get_pods.short_description = 'Pods'
 
     # Returns time left (timedelta)
     def _get_time_left(self):
@@ -57,7 +64,7 @@ class Schedule:
     def __init__(self, lab, start_day, days=7):
 
         self.start_day = start_day
-
+        
         # Compile index of Pods for this Lab
         self.pod_index = {}
         i = 1
@@ -75,10 +82,11 @@ class Schedule:
                     self.schedule[h][d.date().day][i] = None
 
         # Assign Reservations to schedule
-        for r in Reservation.objects.filter(pod__lab=lab):
-            self.schedule[r.start_time.hour][r.start_time.day][self.pod_index[r.pod_id]] = r
-            if r.midnight_split:
-                self.schedule[0][r.start_time.day+1][self.pod_index[r.pod_id]] = r
+        for r in Reservation.objects.filter(lab=lab):
+            for p in r.pods.all():
+                self.schedule[r.start_time.hour][r.start_time.day][self.pod_index[p.id]] = r
+                if r.midnight_split:
+                    self.schedule[0][r.start_time.day+1][self.pod_index[p.id]] = r
 
     def get_weekdays(self):
         return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]

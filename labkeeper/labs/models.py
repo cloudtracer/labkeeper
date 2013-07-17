@@ -22,7 +22,7 @@ class Lab(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('lab', kwargs={'id': self.id})
+        return reverse('lab', kwargs={'lab_id': self.id})
 
     def get_members(self):
         return [m.user for m in self.memberships.all()]

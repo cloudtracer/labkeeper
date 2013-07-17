@@ -8,7 +8,7 @@
       <th>Duration</th>
       <th>User</th>
       <th>Lab</th>
-      <th>Pod</th>
+      <th>Pod(s)</th>
       <th>Created</th>
     </tr>
   </thead>
@@ -18,8 +18,8 @@
       <td><a href="{{ rsv.get_absolute_url }}">{{ rsv.start_time }}</a></td>
       <td>{{ rsv.duration }} hours</td>
       <td>{{ rsv.user }}</td>
-      <td>{{ rsv.pod.lab }}</td>
-      <td>{{ rsv.pod }}</td>
+      <td>{{ rsv.lab }}</td>
+      <td>{{ rsv.get_pods }}</td>
       <td>{{ rsv.created_time }}</td>
     </tr>
     {% endfor %}
