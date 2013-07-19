@@ -1,3 +1,5 @@
+import pytz
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -6,11 +8,15 @@ from django.template.defaultfilters import slugify
 
 from django_bleach.models import BleachField
 
-
 class Lab(models.Model):
+    HOURS = [(i, "{0}:00".format(i)) for i in range(24)]
+
     name = models.CharField('Name', max_length=80, unique=True)
     is_public = models.BooleanField('Public', default=True, help_text="This lab is viewable by everyone")
     is_active = models.BooleanField('Active', default=False, help_text="This lab is open for new reservations")
+    opening_time = models.PositiveSmallIntegerField('Opens at', choices=HOURS, blank=True, null=True, help_text="UTC time")
+    closing_time = models.PositiveSmallIntegerField('Closes at', choices=HOURS, blank=True, null=True, help_text="UTC time")
+    allow_multipod = models.BooleanField('Multi-pod reservations', default=True, help_text="Allow users to reserve multiple pods at once")
     profile = BleachField(blank=True)
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
@@ -32,6 +38,19 @@ class Lab(models.Model):
 
     def get_owners(self):
         return [m.user for m in self.memberships.filter(role=Membership.OWNER)]
+
+    def _get_open_hours(self):
+        """Return a list of hours during which the Lab is available each day"""
+        if self.opening_time and not self.closing_time:
+            return range(self.opening_time, 24)
+        if not self.opening_time and self.closing_time:
+            return range(0, self.closing_time)
+        if self.opening_time < self.closing_time:
+            return range(self.opening_time, self.closing_time)
+        if self.opening_time > self.closing_time:
+            return range(self.opening_time, 24) + range(0, self.closing_time)
+        return range(0, 24)
+    open_hours = property(_get_open_hours)
 
 
 class Pod(models.Model):

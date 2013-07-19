@@ -1,5 +1,5 @@
 import pytz
-from datetime import date, datetime
+from datetime import datetime
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -36,7 +36,7 @@ def schedule(request, lab_id):
     lab = get_object_or_404(Lab, id=lab_id)
 
     # Generate the Lab's schedule for the next seven days
-    s = Schedule(lab, date.today(), timezone=request.session.get('django_timezone'))
+    s = Schedule(lab, tz=request.session.get('django_timezone'))
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,

@@ -1,5 +1,5 @@
 import pytz
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from dateutil import rrule
 
 from django.contrib.auth.models import User
@@ -70,10 +70,13 @@ class ScheduleBlock:
 
 class Schedule:
 
-    def __init__(self, lab, start_day, timezone=None, days=7):
+    def __init__(self, lab, tz=None, days=7):
 
-        self.start_day = start_day
-        self.timezone = timezone or pytz.timezone('UTC')
+        self.tz = tz or pytz.timezone('UTC')
+
+        # Initialize schedule's starting and ending timezone-aware datetimes
+        self.start_day = timezone.now().astimezone(self.tz).date()
+        self.end_day = self.start_day + timedelta(days)
 
         # Compile index of Pods for this Lab
         self.pod_index = {}
@@ -86,20 +89,27 @@ class Schedule:
         self.schedule = {}
         for h in range(24):
             self.schedule[h] = {}
-            for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(start_day, time(0, 0)), count=days):
+            for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(self.start_day, time()), count=days):
                 self.schedule[h][d.date().day] = {}
                 for p, i in self.pod_index.items():
                     self.schedule[h][d.date().day][i] = None
 
         # Assign Reservations to schedule
-        for r in Reservation.objects.filter(lab=lab):
+        for r in lab.reservations.filter(
+                    models.Q(start_time__range=(self.start_day, self.end_day)) |
+                    models.Q(end_time__range=(self.start_day, self.end_day))
+                ).select_related('pods'):
             for p in r.pods.all():
-                start_time = r.start_time.astimezone(tz=self.timezone)
-                midnight_split = r.get_midnight_split(self.timezone)
+                # Convert Reservation start and end times to the current timezone
+                start_time = r.start_time.astimezone(tz=self.tz)
+                end_time = r.end_time.astimezone(tz=self.tz)
+                midnight_split = r.get_midnight_split(self.tz)
                 if midnight_split:
                     # Create two ScheduleBocks (one for each day) and wrap them
-                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), wrap=True)
-                    self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
+                    if start_time.date() >= self.start_day:
+                        self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), wrap=True)
+                    if end_time.date() < self.end_day:
+                        self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
                 else:
                     self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(r.duration, r.get_absolute_url())
 
