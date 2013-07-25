@@ -2,7 +2,6 @@ import pytz
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
 
@@ -17,6 +16,10 @@ class Lab(models.Model):
     opening_time = models.PositiveSmallIntegerField('Opens at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     closing_time = models.PositiveSmallIntegerField('Closes at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     allow_multipod = models.BooleanField('Multi-pod reservations', default=True, help_text="Allow users to reserve multiple pods at once")
+    min_reservation = models.PositiveSmallIntegerField('Minimum reservation', choices=[(i, i) for i in range(1, 24)], default=2,
+                                                       help_text="Minimum reservation time (in hours)")
+    max_reservation = models.PositiveSmallIntegerField('Maximum reservation', choices=[(i, i) for i in range(1, 24)], default=6,
+                                                       help_text="Maximum reservation time (in hours)")
     profile = BleachField(blank=True)
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
@@ -57,12 +60,6 @@ class Pod(models.Model):
     lab = models.ForeignKey(Lab, related_name='pods')
     name = models.CharField('Name', max_length=30, default='')
     slug = models.SlugField('Slug', max_length=30, editable=False)
-    min_reservation = models.PositiveSmallIntegerField('Minimum reservation', default=2,
-                                                       validators=[MinValueValidator(1), MaxValueValidator(24)],
-                                                       help_text="Minimum reservation time (in hours)")
-    max_reservation = models.PositiveSmallIntegerField('Maximum reservation', default=6,
-                                                       validators=[MinValueValidator(1), MaxValueValidator(24)],
-                                                       help_text="Maximum reservation time (in hours)")
 
     class Meta:
         ordering = ['name']

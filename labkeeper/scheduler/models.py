@@ -24,7 +24,9 @@ class Reservation(models.Model):
     password = models.CharField('Password', max_length=16)
 
     class Meta:
-        pass
+        unique_together = (
+            ('user', 'password'),
+        )
 
     def __unicode__(self):
         return "{0} reserved by {1} at {2}".format(self.get_pods(), self.user, self.start_time)
