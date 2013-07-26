@@ -7,19 +7,14 @@ class LabForm(forms.ModelForm):
 
     class Meta:
         model = Lab
-        fields = ['name', 'is_public', 'is_active', 'opening_time', 'closing_time', 'allow_multipod', 'profile']
+        fields = ['name', 'is_public', 'is_active', 'opening_time', 'closing_time', 'allow_multipod', 'min_reservation', 'max_reservation', 'profile']
 
 
 class PodForm(forms.ModelForm):
 
     class Meta:
         model = Pod
-        fields = ['name', 'min_reservation', 'max_reservation']
-
-    def __init__(self, *args, **kwargs):
-        super(PodForm, self).__init__(*args, **kwargs)
-        self.fields['min_reservation'].widget.attrs['class'] = 'input-mini'
-        self.fields['max_reservation'].widget.attrs['class'] = 'input-mini'
+        fields = ['name']
 
 
 class ConsoleServerForm(forms.ModelForm):

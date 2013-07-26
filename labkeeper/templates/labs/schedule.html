@@ -1,5 +1,6 @@
 {% extends '_base.html' %}
 {% load tz %}
+{% load bootstrap_tags %}
 
 {% block headextra %}
 <style type="text/css">
@@ -21,9 +22,6 @@ div.cell {
   float: left;
   height: 24px;
   width: 112px; /* (pod.width + pod.left-padding) * pod_count + 4 */
-}
-div.closed div.cell:not(.hour) {
-  background-color: #d0d0d0;
 }
 div.day {
   border-right: 1px solid #ffffff;
@@ -81,24 +79,19 @@ div.block a {
   width: 100%;
   z-index: 1000;
 }
-div.hours1 {
-  height: 17px;	/* 1*25-8 */
-}
-div.hours2 {
-  height: 42px;	/* 2*25-8 */
-}
-div.hours3 {
-  height: 67px;	/* 3*25-8 */
-}
-div.hours4 {
-  height: 92px;	/* 4*25-8 */
-}
-div.hours5 {
-  height: 117px;	/* 5*25-8 */
-}
-div.hours6 {
-  height: 142px;	/* 6*25-8 */
-}
+div.duration30  { height: 8px;  /* 0.5*25-8+3 */ }
+div.duration60  { height: 17px;  /* 1*25-8 */ }
+div.duration90  { height: 30px;  /* 1.5*25-8 */ }
+div.duration120 { height: 42px;	 /* 2*25-8 */ }
+div.duration150 { height: 55px;	 /* 2.5*25-8 */ }
+div.duration180 { height: 67px;	 /* 3*25-8 */ }
+div.duration210 { height: 80px;	 /* 3.5*25-8 */ }
+div.duration240 { height: 92px;  /* 4*25-8 */ }
+div.duration270 { height: 105px; /* 4.5*25-8 */ }
+div.duration300 { height: 117px; /* 5*25-8 */ }
+div.duration330 { height: 130px; /* 5.5*25-8 */ }
+div.duration360 { height: 142px; /* 6*25-8 */ }
+div.offset30 { margin-top: 10px; }
 div.wrap {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -115,7 +108,8 @@ div.unwrap {
 <div class="container">
   <div class="row">
     <div class="span3">
-      <p>Reservation form goes here</p>
+      <h5>New Reservation</h5>
+      {{ reservation_form|as_bootstrap }}
     </div>
     <div class="span9">
       <div id="schedule">
@@ -126,14 +120,14 @@ div.unwrap {
           {% endfor %}
         </div>
         {% for hour, days in s.schedule.items %}
-        <div class="schedrow{% if hour not in lab.open_hours %} closed{% endif %}">
+        <div class="schedrow">
           <div class="cell hour">{{ hour }}:00</div>
           {% for day, pods in days.items %}
           <div class="cell">
             {% for pod, block in pods.items %}
             <div class="pod podof{{ pods|length }} pod{{ pod }}">
               {% if block %}
-              <div class="block hours{{ block.duration }}{% if block.wrap %} wrap{% elif block.unwrap %} unwrap{% endif %}"><a href="{{ block.url }}"></a></div>
+              <div class="block duration{{ block.duration }}{% if block.offset %} offset{{ block.offset }}{% endif %}{% if block.wrap %} wrap{% elif block.unwrap %} unwrap{% endif %}"><a href="{{ block.url }}" title="{{ block.duration }} minutes"></a></div>
               {% endif %}
             </div>
             {% endfor %}

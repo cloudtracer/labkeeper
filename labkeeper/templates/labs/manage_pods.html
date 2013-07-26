@@ -6,8 +6,6 @@
       <thead>
         <tr>
           <th>Pod</th>
-          <th>Min Resv.</th>
-          <th>Max Resv.</th>
           <th>Devices</th>
           <th>Actions</th>
         </tr>
@@ -16,8 +14,6 @@
         {% for pod in pod_list %}
         <tr>
           <td><a href="{% url 'labs_edit_pod' pod.id %}">{{ pod }}</a></td>
-          <td>{{ pod.min_reservation }}</td>
-          <td>{{ pod.max_reservation }}</td>
           <td>{{ pod.devices.all|join:", " }}</td>
           <td>
             <a href="{% url 'labs_edit_pod' pod.id %}">edit</a>

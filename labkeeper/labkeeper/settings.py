@@ -134,10 +134,16 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'south',
     'debug_toolbar',
+
+    # Forms stuff
     'django_forms_bootstrap',
     'widget_tweaks',
+
+    # User content
     'django_bleach',
     'tinymce',
+
+    # Local
     'labs',
     'scheduler',
     'radiusd',

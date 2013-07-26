@@ -1,5 +1,5 @@
 import pytz
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, time, timedelta
 from dateutil import rrule
 
 from django.contrib.auth.models import User
@@ -54,18 +54,19 @@ class Reservation(models.Model):
     # for schedule presentation
     def get_midnight_split(self, timezone):
         start_time = self.start_time.astimezone(tz=timezone)
-        x = 24 - start_time.hour
-        if x < self.duration:
-            return (x, self.duration - x)
+        mins_before_midnight = (24 - start_time.hour)*60 - start_time.minute
+        if mins_before_midnight < self.duration*60:
+            return (mins_before_midnight, self.duration*60 - mins_before_midnight)
         else:
             return None
 
 
 class ScheduleBlock:
 
-    def __init__(self, duration, url, wrap=False, unwrap=False):
+    def __init__(self, duration, url, offset=0, wrap=False, unwrap=False):
         self.duration = duration
         self.url = url
+        self.offset = offset
         self.wrap = wrap
         self.unwrap = unwrap
 
@@ -109,11 +110,11 @@ class Schedule:
                 if midnight_split:
                     # Create two ScheduleBocks (one for each day) and wrap them
                     if start_time.date() >= self.start_day:
-                        self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), wrap=True)
+                        self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), offset=start_time.minute, wrap=True)
                     if end_time.date() < self.end_day:
                         self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
                 else:
-                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(r.duration, r.get_absolute_url())
+                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(r.duration*60, r.get_absolute_url())
 
     def get_weekdays(self):
         return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]

@@ -12,6 +12,7 @@ from scheduler.models import Schedule
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
 from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, PodForm
+from scheduler.forms import ReservationForm
 
 
 def default(request):
@@ -35,11 +36,14 @@ def schedule(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
+    request.session['django_timezone'] = pytz.timezone('Canada/Newfoundland')
+
     # Generate the Lab's schedule for the next seven days
     s = Schedule(lab, tz=request.session.get('django_timezone'))
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
+        'reservation_form': ReservationForm(lab),
         's': s,
         'current_time': datetime.now(),
         'nav_labs': 'schedule',
