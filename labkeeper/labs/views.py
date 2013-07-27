@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from scheduler.models import Schedule
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
-from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, PodForm
+from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, NewConsoleServerForm, PodForm
 from scheduler.forms import ReservationForm
 
 
@@ -158,14 +158,26 @@ def manage_consoleservers(request, lab_id):
         return HttpResponseForbidden()
 
     if request.method == 'POST':
-        form = ConsoleServerForm(request.POST)
+        form = NewConsoleServerForm(request.POST)
         if form.is_valid():
+            # Create the new ConsoleServer
             new_consoleserver = form.save(commit=False)
             new_consoleserver.lab = lab
             new_consoleserver.save()
-            form = ConsoleServerForm()
+            messages.success(request, "Created console server {0}".format(new_consoleserver.name))
+            # If directed, create n initial ConsoleServerPorts
+            if form.cleaned_data['port_count']:
+                for i in range(int(form.cleaned_data['port_count'])):
+                    ConsoleServerPort.objects.create(
+                        consoleserver = new_consoleserver,
+                        number = form.cleaned_data['base_port_number'] + i,
+                        telnet_port = form.cleaned_data['base_telnet_port'] + i,
+                        ssh_port = form.cleaned_data['base_ssh_port'] + i
+                    )
+                messages.success(request, "Created {0} console server ports".format(i + 1))
+            return redirect(reverse('labs_edit_consoleserver', kwargs={'cs_id': new_consoleserver.id}))
     else:
-        form = ConsoleServerForm()
+        form = NewConsoleServerForm()
 
     return render(request, 'labs/manage_consoleservers.html', {
         'lab': lab,
