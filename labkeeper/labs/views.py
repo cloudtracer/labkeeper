@@ -36,15 +36,15 @@ def schedule(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
-    request.session['django_timezone'] = pytz.timezone('Canada/Newfoundland')
+    request.session['django_timezone'] = pytz.timezone('US/Eastern')
 
     # Generate the Lab's schedule for the next seven days
-    s = Schedule(lab, tz=request.session.get('django_timezone'))
+    schedule = Schedule(lab, tz=request.session.get('django_timezone'))
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
-        'reservation_form': ReservationForm(lab),
-        's': s,
+        'reservation_form': ReservationForm(lab, schedule),
+        's': schedule,
         'current_time': datetime.now(),
         'nav_labs': 'schedule',
         })

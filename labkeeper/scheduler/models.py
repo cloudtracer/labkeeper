@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
+from django.utils.datastructures import SortedDict
 
 from labs.models import Lab, Pod
 
@@ -89,13 +90,13 @@ class Schedule:
             i += 1
 
         # Build the schedule skeleton of 24 hours * 7 days * n Pods
-        self.schedule = {}
+        self.schedule = SortedDict()
         for h in range(24):
-            self.schedule[h] = {}
-            for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(self.start_day, time()), count=days):
-                self.schedule[h][d.date().day] = {}
+            self.schedule[h] = SortedDict()
+            for d in self.get_days():
+                self.schedule[h][d] = SortedDict()
                 for p, i in self.pod_index.items():
-                    self.schedule[h][d.date().day][i] = None
+                    self.schedule[h][d][i] = None
 
         # Assign Reservations to schedule
         for r in lab.reservations.filter(
@@ -110,11 +111,22 @@ class Schedule:
                 if midnight_split:
                     # Create two ScheduleBocks (one for each day) and wrap them
                     if start_time.date() >= self.start_day:
-                        self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), offset=start_time.minute, wrap=True)
+                        self.schedule[start_time.hour][start_time.date()][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), offset=start_time.minute, wrap=True)
                     if end_time.date() < self.end_day:
                         self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
                 else:
-                    self.schedule[start_time.hour][start_time.day][self.pod_index[p.id]] = ScheduleBlock(r.duration*60, r.get_absolute_url())
+                    self.schedule[start_time.hour][start_time.date()][self.pod_index[p.id]] = ScheduleBlock(r.duration*60, r.get_absolute_url(), offset=start_time.minute)
+
+    def get_days(self, day_count=7):
+        return [d.date() for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(self.start_day, time()), count=day_count)]
 
     def get_weekdays(self):
         return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]
+
+    def get_hours(self):
+        """Return UTC hours 0-23 in the local timezone (needed for partial-hour offsets)"""
+        hours = []
+        for i in range(24):
+            h = datetime.combine(self.start_day, time(tzinfo=pytz.UTC)) + timedelta(hours=i)
+            hours.append(h.astimezone(self.tz).strftime("%H:%M"))
+        return sorted(hours)
