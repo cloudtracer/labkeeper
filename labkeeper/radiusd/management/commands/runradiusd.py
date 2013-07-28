@@ -68,26 +68,26 @@ class RadiusServer(server.Server):
         if userdomain:
             self.debug("Identifying console server by domain ({0})".format(userdomain))
             try:
-                c = ConsoleServer.objects.get(fqdn=userdomain)
+                cs = ConsoleServer.objects.get(fqdn=userdomain)
             except ConsoleServer.DoesNotExist:
                 self.bail("Unrecognized console server ({0})".format(userdomain))
             # Enforce IP address if one has been set for the ConsoleServer
             # TODO: IPv6 support (Yes, I'm a bad networker)
-            if c.ip4_address and c.ip4_address != pkt.source[0]:
-                self.bail("Requester IP ({0}) does not match console server IP ({1})".format(pkt.source[0], c.ip4_address))
+            if cs.ip4_address and cs.ip4_address != pkt.source[0]:
+                self.bail("Requester IP ({0}) does not match console server IP ({1})".format(pkt.source[0], cs.ip4_address))
             # Verify that the domain specified resolves to the requester's IP
             elif pkt.source[0] not in domain_to_ip(userdomain):
                 self.bail("Domain authentication failure from {0} for {1}".format(pkt.source[0], userdomain))
         else:
             self.debug("Identifying console server by IP address ({0})".format(pkt.source[0]))
             try:
-                c = ConsoleServer.objects.get(ip4_address=pkt.source[0])
+                cs = ConsoleServer.objects.get(ip4_address=pkt.source[0])
             except ConsoleServer.DoesNotExist:
                 self.bail("Unrecognized console server ({0})".format(pkt.source[0]))
-        self.debug("Found console server: {0}".format(self.auth_counter, c))
+        self.debug("Found console server: {0}".format(self.auth_counter, cs))
 
         # Record shared secret stored by ConsoleServer
-        pkt.secret = str(c.secret)
+        pkt.secret = str(cs.secret)
 
         # Step 2: Attempt to retrieve the User based on the given User-Name
         try:
@@ -98,8 +98,7 @@ class RadiusServer(server.Server):
 
         # Step 3: Attempt to locate a Reservation for this User
         try:
-            #r = Reservation.objects.get(user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]), start_time__lte=timezone.now(), end_time__gt=timezone.now())
-            r = Reservation.objects.get(user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]))
+            r = Reservation.objects.get(lab=cs.lab, user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]))
         except Reservation.DoesNotExist:
             self.access_reject(pkt, "Sorry, no reservation found for {0}").format(username)
             return
@@ -114,7 +113,7 @@ class RadiusServer(server.Server):
 
         # Step 5: Match the given NAS-Port to a ConsoleServerPort
         try:
-            d = c.ports.get(number=pkt['NAS-Port'][0]).device
+            d = cs.ports.get(number=pkt['NAS-Port'][0]).device
         except ConsoleServerPort.DoesNotExist:
             self.access_reject(pkt, "Console server port {0} is not recognized".format(pkt['NAS-Port'][0]))
             return

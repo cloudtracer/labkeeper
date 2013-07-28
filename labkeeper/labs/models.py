@@ -16,9 +16,9 @@ class Lab(models.Model):
     opening_time = models.PositiveSmallIntegerField('Opens at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     closing_time = models.PositiveSmallIntegerField('Closes at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     allow_multipod = models.BooleanField('Multi-pod reservations', default=True, help_text="Allow users to reserve multiple pods at once")
-    min_reservation = models.PositiveSmallIntegerField('Minimum reservation', choices=[(i, i) for i in range(1, 25)], default=2,
+    min_reservation = models.PositiveSmallIntegerField('Minimum reservation', choices=[(i, i) for i in range(1, 13)], default=2,
                                                        help_text="Minimum reservation time (in hours)")
-    max_reservation = models.PositiveSmallIntegerField('Maximum reservation', choices=[(i, i) for i in range(1, 25)], default=6,
+    max_reservation = models.PositiveSmallIntegerField('Maximum reservation', choices=[(i, i) for i in range(1, 13)], default=6,
                                                        help_text="Maximum reservation time (in hours)")
     profile = BleachField(blank=True)
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)

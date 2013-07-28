@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime
+from dateutil import parser
 
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -12,13 +13,14 @@ from scheduler.models import Schedule
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
 from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, NewConsoleServerForm, PodForm
+from scheduler.models import Reservation
 from scheduler.forms import ReservationForm
 
 
 def default(request):
 
     return render(request, 'labs/default.html', {
-        'lab_list': Lab.objects.filter(is_public=True),
+        'lab_list': Lab.objects.all(),
         })
 
 
@@ -36,14 +38,48 @@ def schedule(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
+    # Hack to set request's timezone
     request.session['django_timezone'] = pytz.timezone('US/Eastern')
+    #request.session['django_timezone'] = pytz.timezone('Canada/Newfoundland')
 
     # Generate the Lab's schedule for the next seven days
     schedule = Schedule(lab, tz=request.session.get('django_timezone'))
 
+    # Creating a new Reservation
+    if request.method == 'POST':
+        reservation_form = ReservationForm(lab, schedule, request.POST)
+        if reservation_form.is_valid():
+            # Membership check
+            if not lab.is_public and request.user not in lab.memberships.all():
+                messages.error(request, "This lab is private and you are not a member.")
+                return redirect(lab.get_absolute_url())
+            # Create a full datetime from the individual date and time fields, then make it timezone-aware
+            start_time = parser.parse(reservation_form.cleaned_data['date'] + ' ' + reservation_form.cleaned_data['time'])
+            start_time = request.session.get('django_timezone').localize(start_time)
+            # Create the Reservation
+            r = Reservation.objects.create(
+                user = request.user,
+                lab = lab,
+                # TODO: Add awareness of X-FORWARDED-FOR header?
+                created_ip_address = request.META.get('REMOTE_ADDR'),
+                start_time = start_time,
+                duration = int(reservation_form.cleaned_data['duration'])
+            )
+            # Add Pod(s) to the Reservation
+            if isinstance(reservation_form.cleaned_data['pods'], basestring):
+                r.pods.add(lab.pods.get(id=reservation_form.cleaned_data['pods']))
+            else:
+                for pod_id in reservation_form.cleaned_data['pods']:
+                    r.pods.add(lab.pods.get(id=pod_id))
+            messages.success(request, "Your reservation has been created.")
+            return redirect(reverse('scheduler_reservation', kwargs={'rsv_id': r.id}))
+    else:
+        reservation_form = ReservationForm(lab, schedule)
+
     return render(request, 'labs/schedule.html', {
         'lab': lab,
-        'reservation_form': ReservationForm(lab, schedule),
+        'reservation_form': reservation_form,
+        'reservation_allowed': lab.is_public or request.user in lab.memberships.all(),
         's': schedule,
         'current_time': datetime.now(),
         'nav_labs': 'schedule',

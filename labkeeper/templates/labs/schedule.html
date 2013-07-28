@@ -91,6 +91,18 @@ div.duration270 { height: 105px; /* 4.5*25-8 */ }
 div.duration300 { height: 117px; /* 5*25-8 */ }
 div.duration330 { height: 130px; /* 5.5*25-8 */ }
 div.duration360 { height: 142px; /* 6*25-8 */ }
+div.duration390 { height: 155px; /* 6.5*25-8 */ }
+div.duration420 { height: 167px; /* 7*25-8 */ }
+div.duration450 { height: 180px; /* 7.5*25-8 */ }
+div.duration480 { height: 192px; /* 8*25-8 */ }
+div.duration510 { height: 205px; /* 8.5*25-8 */ }
+div.duration540 { height: 217px; /* 9*25-8 */ }
+div.duration570 { height: 230px; /* 9.5*25-8 */ }
+div.duration600 { height: 242px; /* 10*25-8 */ }
+div.duration630 { height: 255px; /* 10.5*25-8 */ }
+div.duration660 { height: 268px; /* 11*25-8 */ }
+div.duration690 { height: 280px; /* 11.5*25-8 */ }
+div.duration720 { height: 293px; /* 12*25-8 */ }
 div.offset30 { margin-top: 10px; }
 div.wrap {
   border-bottom-left-radius: 0;
@@ -108,16 +120,23 @@ div.unwrap {
 <div class="container">
   <div class="row">
     <div class="span3">
-      <h5>New Reservation</h5>
+      {% if reservation_allowed %}
+      <h5>Reserve this Lab!</h5>
+      <form action="." method="post">
+      {% csrf_token %}
       {{ reservation_form|as_bootstrap }}
       <button type="submit" class="btn btn-primary">Create</button>
+      </form>
+      {% else %}
+      <p>Sorry, this lab may only be reserved by members.</p>
+      {% endif %}
     </div>
     <div class="span9">
       <div id="schedule">
         <div class="schedrow">
           <div class="cell day hour"></div>
-          {% for d in s.get_weekdays %}
-          <div class="cell day">{{ d }}</div>
+          {% for d in s.get_days %}
+          <div class="cell day">{{ d|date:"M j (D)" }}</div>
           {% endfor %}
         </div>
         {% for hour, days in s.schedule.items %}

@@ -25,34 +25,46 @@ class Reservation(models.Model):
     password = models.CharField('Password', max_length=16)
 
     class Meta:
-        unique_together = (
-            ('user', 'password'),
-        )
+        ordering = ['start_time']
 
     def __unicode__(self):
         return "{0} reserved by {1} at {2}".format(self.get_pods(), self.user, self.start_time)
 
     def get_absolute_url(self):
-        return reverse('reservation', kwargs={'rsv_id': self.id})
+        return reverse('scheduler_reservation', kwargs={'rsv_id': self.id})
 
     def save(self, *args, **kwargs):
         self.end_time = self.start_time + timedelta(hours=self.duration)
+        if not self.password:
+            self.password = self.generate_password()
         super(Reservation, self).save(*args, **kwargs)
 
     # For admin list_display
     def get_pods(self):
-        return ', '.join([p.name for p in self.pods.all()])
+        return [p.name for p in self.pods.all()]
     get_pods.short_description = 'Pods'
+
+    # Returns time until the Reservation begins
+    def _get_time_until(self):
+        if self.start_time > timezone.now():
+            return self.start_time - timezone.now().replace(microsecond=0)
+        return None
+    time_until = property(_get_time_until)
 
     # Returns time left (timedelta)
     def _get_time_left(self):
         if self.start_time <= timezone.now() and self.end_time > timezone.now():
-            return self.end_time - timezone.now()
+            return self.end_time - timezone.now().replace(microsecond=0)
         return None
     time_left = property(_get_time_left)
 
+    # Check whether end_time is in the past
+    def _is_expired(self):
+        return self.end_time < timezone.now()
+    is_expired = property(_is_expired)
+
     # Split total duration into hours (before, after) midnight
-    # for schedule presentation
+    # for schedule block presentation
     def get_midnight_split(self, timezone):
         start_time = self.start_time.astimezone(tz=timezone)
         mins_before_midnight = (24 - start_time.hour)*60 - start_time.minute
@@ -60,6 +72,10 @@ class Reservation(models.Model):
             return (mins_before_midnight, self.duration*60 - mins_before_midnight)
         else:
             return None
+
+    def generate_password(self):
+        # TODO: Fix this. Obviously.
+        return "foobar"
 
 
 class ScheduleBlock:
@@ -113,15 +129,12 @@ class Schedule:
                     if start_time.date() >= self.start_day:
                         self.schedule[start_time.hour][start_time.date()][self.pod_index[p.id]] = ScheduleBlock(midnight_split[0], r.get_absolute_url(), offset=start_time.minute, wrap=True)
                     if end_time.date() < self.end_day:
-                        self.schedule[0][start_time.day+1][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
+                        self.schedule[0][start_time.date() + timedelta(days=1)][self.pod_index[p.id]] = ScheduleBlock(midnight_split[1], r.get_absolute_url(), unwrap=True)
                 else:
                     self.schedule[start_time.hour][start_time.date()][self.pod_index[p.id]] = ScheduleBlock(r.duration*60, r.get_absolute_url(), offset=start_time.minute)
 
     def get_days(self, day_count=7):
         return [d.date() for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(self.start_day, time()), count=day_count)]
-
-    def get_weekdays(self):
-        return [(self.start_day + timedelta(days=i)).strftime("%b %d (%a)") for i in range(7)]
 
     def get_hours(self):
         """Return UTC hours 0-23 in the local timezone (needed for partial-hour offsets)"""
