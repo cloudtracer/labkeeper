@@ -8,7 +8,6 @@
       <th>Time</th>
       <th>Starts In</th>
       <th>Duration</th>
-      <th>User</th>
       <th>Lab</th>
       <th>Pod(s)</th>
       <th>Created</th>
@@ -18,9 +17,8 @@
     {% for rsv in rsv_list %}
     <tr>
       <td><a href="{{ rsv.get_absolute_url }}">{{ rsv.start_time }}</a></td>
-      <td>{% if rsv.time_until %}{{ rsv.time_until }}{% elif not rsv.is_expired %}<span class="text-success">Active</span>{% else %}<span class="text-error">Expired</span>{% endif %}</td>
+      <td>{% if rsv.time_until %}{{ rsv.time_until }}{% else %}<span class="text-success">Active now!</span>{% endif %}</td>
       <td>{{ rsv.duration }} hours</td>
-      <td>{{ rsv.user }}</td>
       <td>{{ rsv.lab }}</td>
       <td>{{ rsv.get_pods|join:", " }}</td>
       <td>{{ rsv.created_time }}</td>

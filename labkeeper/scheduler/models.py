@@ -12,7 +12,9 @@ from labs.models import Lab, Pod
 
 
 class Reservation(models.Model):
-    """A reservation made by a User for a Pod."""
+    """
+    A reservation made by a User for a Pod. Reservations must be made on UTC hours on a length of n hours.
+    """
 
     user = models.ForeignKey(User, related_name='reservations')
     lab = models.ForeignKey(Lab, related_name='reservations')
@@ -39,10 +41,9 @@ class Reservation(models.Model):
             self.password = self.generate_password()
         super(Reservation, self).save(*args, **kwargs)
 
-    # For admin list_display
+    # List the names of the reserved Pods
     def get_pods(self):
         return [p.name for p in self.pods.all()]
-    get_pods.short_description = 'Pods'
 
     # Returns time until the Reservation begins
     def _get_time_until(self):
@@ -73,6 +74,7 @@ class Reservation(models.Model):
         else:
             return None
 
+    # Generate a random password (used on Reservation creation)
     def generate_password(self):
         # TODO: Fix this. Obviously.
         return "foobar"

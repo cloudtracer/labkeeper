@@ -20,7 +20,7 @@ from scheduler.forms import ReservationForm
 def default(request):
 
     return render(request, 'labs/default.html', {
-        'lab_list': Lab.objects.all(),
+        'lab_list': Lab.objects.filter(is_active=True),
         })
 
 
@@ -45,16 +45,20 @@ def schedule(request, lab_id):
     # Generate the Lab's schedule for the next seven days
     schedule = Schedule(lab, tz=request.session.get('django_timezone'))
 
+    # Determine if the current User is allowed to make a Reservation
+    if request.user in lab.admins:
+        reservation_allowed = True
+    elif lab.is_active and (lab.is_public or request.user in lab.members):
+        reservation_allowed = True
+    else:
+        reservation_allowed = False
+
     # Creating a new Reservation
-    if request.method == 'POST':
+    if reservation_allowed and request.method == 'POST':
         reservation_form = ReservationForm(lab, schedule, request.POST)
         if reservation_form.is_valid():
-            # Membership check
-            if not lab.is_public and request.user not in lab.memberships.all():
-                messages.error(request, "This lab is private and you are not a member.")
-                return redirect(lab.get_absolute_url())
             # Create a full datetime from the individual date and time fields, then make it timezone-aware
-            start_time = parser.parse(reservation_form.cleaned_data['date'] + ' ' + reservation_form.cleaned_data['time'])
+            start_time = parser.parse(' '.join((reservation_form.cleaned_data['date'], reservation_form.cleaned_data['time'])))
             start_time = request.session.get('django_timezone').localize(start_time)
             # Create the Reservation
             r = Reservation.objects.create(
@@ -65,7 +69,7 @@ def schedule(request, lab_id):
                 start_time = start_time,
                 duration = int(reservation_form.cleaned_data['duration'])
             )
-            # Add Pod(s) to the Reservation
+            # Add reserved Pod(s) to the Reservation
             if isinstance(reservation_form.cleaned_data['pods'], basestring):
                 r.pods.add(lab.pods.get(id=reservation_form.cleaned_data['pods']))
             else:
@@ -73,13 +77,14 @@ def schedule(request, lab_id):
                     r.pods.add(lab.pods.get(id=pod_id))
             messages.success(request, "Your reservation has been created.")
             return redirect(reverse('scheduler_reservation', kwargs={'rsv_id': r.id}))
-    else:
+    elif reservation_allowed:
         reservation_form = ReservationForm(lab, schedule)
+    else:
+        reservation_form = None
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
         'reservation_form': reservation_form,
-        'reservation_allowed': lab.is_public or request.user in lab.memberships.all(),
         's': schedule,
         'current_time': datetime.now(),
         'nav_labs': 'schedule',
@@ -100,7 +105,7 @@ def member_list(request, lab_id):
 def edit_lab(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_owners():
+    if request.user not in lab.owners:
         return HttpResponseForbidden()
 
     # Processing a submitted form
@@ -126,7 +131,7 @@ def edit_lab(request, lab_id):
 def manage_pods(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_owners():
+    if request.user not in lab.owners:
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -151,7 +156,7 @@ def manage_pods(request, lab_id):
 def edit_pod(request, pod_id):
 
     pod = get_object_or_404(Pod, id=pod_id)
-    if request.user not in pod.lab.get_owners():
+    if request.user not in pod.lab.owners:
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -174,7 +179,7 @@ def edit_pod(request, pod_id):
 def delete_pod(request, pod_id):
 
     pod = get_object_or_404(Pod, id=pod_id)
-    if request.user not in pod.lab.get_owners():
+    if request.user not in pod.lab.owners:
         return HttpResponseForbidden()
 
     # Don't delete a Pod which has one or more Devices assigned
@@ -190,7 +195,7 @@ def delete_pod(request, pod_id):
 def manage_consoleservers(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_owners():
+    if request.user not in lab.owners:
         return HttpResponseForbidden()
 
     if request.method == 'POST':
@@ -227,7 +232,7 @@ def manage_consoleservers(request, lab_id):
 def edit_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
-    if request.user not in cs.lab.get_owners():
+    if request.user not in cs.lab.owners:
         return HttpResponseForbidden()
 
     ConsoleServerPortFormSet = inlineformset_factory(ConsoleServer, ConsoleServerPort, form=ConsoleServerPortForm, extra=4, max_num=48)
@@ -263,7 +268,7 @@ def edit_consoleserver(request, cs_id):
 def delete_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
-    if request.user not in cs.lab.get_owners():
+    if request.user not in cs.lab.owners:
         return HttpResponseForbidden()
 
     # Don't delete a ConsoleServer with one or more Devices assigned
@@ -279,15 +284,15 @@ def delete_consoleserver(request, cs_id):
 def manage_devices(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-    if request.user not in lab.get_owners():
+    if request.user not in lab.owners:
         return HttpResponseForbidden()
 
+    # TODO: This formset generates excessive SQL queries; any way to optimize it?
     DeviceFormSet = modelformset_factory(Device, can_delete=True, extra=3)
-
     if request.method == 'POST':
         formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
         for form in formset:
-            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
+            form.fields['pod'].choices = Pod.objects.filter(lab=lab)
             form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
         if formset.is_valid():
             formset.save()

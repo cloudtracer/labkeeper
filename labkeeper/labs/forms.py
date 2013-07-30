@@ -1,13 +1,13 @@
 from django import forms
 
-from labs.models import ConsoleServer, ConsoleServerPort, Lab, Pod
+from labs.models import Device, ConsoleServer, ConsoleServerPort, Lab, Pod
 
 
 class LabForm(forms.ModelForm):
 
     class Meta:
         model = Lab
-        fields = ['name', 'is_public', 'is_active', 'opening_time', 'closing_time', 'allow_multipod', 'min_reservation', 'max_reservation', 'profile']
+        fields = ['name', 'is_public', 'is_active', 'allow_multipod', 'min_reservation', 'max_reservation', 'profile']
 
 
 class PodForm(forms.ModelForm):

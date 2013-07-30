@@ -2,9 +2,16 @@
 
 {% block content %}
 <h1>Labs!</h1>
-<ul>
+<div class="row">
+  <div class="span4"><h5 class="muted">Lab Name</h5></div>
+  <div class="span2"><h5 class="muted">Pods</h5></div>
+  <div class="span2"><h5 class="muted">Members</h5></div>
+</div>
 {% for l in lab_list %}
-  <li><a href="{% url 'lab' l.id %}">{{ l }}</a></li>
+<div class="row">
+  <div class="span4"><h4><a href="{% url 'lab' l.id %}">{{ l }}</a></h4></div>
+  <div class="span2"><h4>{{ l.pods.count }}</h4></div>
+  <div class="span2"><h4>{{ l.members|length }}</h4></div>
+</div>
 {% endfor %}
-</ul>
 {% endblock %}
