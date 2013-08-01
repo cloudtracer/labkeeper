@@ -55,7 +55,7 @@ def schedule(request, lab_id):
 
     # Creating a new Reservation
     if reservation_allowed and request.method == 'POST':
-        reservation_form = ReservationForm(lab, schedule, request.POST)
+        reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'], request.POST)
         if reservation_form.is_valid():
             # Create a full datetime from the individual date and time fields, then make it timezone-aware
             start_time = parser.parse(' '.join((reservation_form.cleaned_data['date'], reservation_form.cleaned_data['time'])))
@@ -78,12 +78,13 @@ def schedule(request, lab_id):
             messages.success(request, "Your reservation has been created.")
             return redirect(reverse('scheduler_reservation', kwargs={'rsv_id': r.id}))
     elif reservation_allowed:
-        reservation_form = ReservationForm(lab, schedule)
+        reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'])
     else:
         reservation_form = None
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
+        'lab_open_hours': [int(h.split(':')[0]) for h in lab.get_open_hours(tz=request.session.get('django_timezone'))],
         'reservation_form': reservation_form,
         's': schedule,
         'current_time': datetime.now(),

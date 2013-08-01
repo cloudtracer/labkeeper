@@ -137,11 +137,3 @@ class Schedule:
 
     def get_days(self, day_count=7):
         return [d.date() for d in rrule.rrule(rrule.DAILY, dtstart=datetime.combine(self.start_day, time()), count=day_count)]
-
-    def get_hours(self):
-        """Return UTC hours 0-23 in the local timezone (needed for partial-hour offsets)"""
-        hours = []
-        for i in range(24):
-            h = datetime.combine(self.start_day, time(tzinfo=pytz.UTC)) + timedelta(hours=i)
-            hours.append(h.astimezone(self.tz).strftime("%H:%M"))
-        return sorted(hours)
