@@ -42,7 +42,7 @@ class ReservationForm(forms.Form):
 
         # Calculate start and end times of the requested time slot
         start_time = self.tz.localize(parser.parse(cleaned_data['date'] + ' ' + cleaned_data['time']))
-        end_time = start_time + timedelta(hours=int(cleaned_data['duration'])) - timedelta(minutes=1)
+        end_time = start_time + timedelta(hours=int(cleaned_data['duration'])) - timedelta(seconds=1)
 
         # Verify that end_time is in the future
         if end_time <= timezone.now():

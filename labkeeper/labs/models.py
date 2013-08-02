@@ -24,6 +24,7 @@ class Lab(models.Model):
     is_public = models.BooleanField('Public', default=True, help_text="Reservation is open to non-members")
     is_active = models.BooleanField('Active', default=False, help_text="This lab is open for new reservations")
     allow_multipod = models.BooleanField('Multi-pod reservations', default=True, help_text="Allow a user to reserve multiple pods at once")
+    max_rsv_per_user = models.PositiveSmallIntegerField('Max reservations per user', default=0, help_text="The maximum number of active reservations an individual may have (0=disable)")
     opening_time = models.PositiveSmallIntegerField('Opens at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     closing_time = models.PositiveSmallIntegerField('Closes at', choices=HOURS, blank=True, null=True, help_text="UTC time")
     min_reservation = models.PositiveSmallIntegerField('Minimum reservation time', choices=[(i, "%d hours" % i) for i in range(1, 13)], default=2,

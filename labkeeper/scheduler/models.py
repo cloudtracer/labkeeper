@@ -36,7 +36,7 @@ class Reservation(models.Model):
         return reverse('scheduler_reservation', kwargs={'rsv_id': self.id})
 
     def save(self, *args, **kwargs):
-        self.end_time = self.start_time + timedelta(hours=self.duration, minutes=-1)
+        self.end_time = self.start_time + timedelta(hours=self.duration, seconds=-1)
         if not self.password:
             self.password = self.generate_password()
         super(Reservation, self).save(*args, **kwargs)

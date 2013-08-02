@@ -8,6 +8,7 @@ from django.db.models import Count
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from scheduler.models import Schedule
 
@@ -47,14 +48,18 @@ def schedule(request, lab_id):
 
     # Determine if the current User is allowed to make a Reservation
     if request.user in lab.admins:
-        reservation_allowed = True
-    elif lab.is_active and (lab.is_public or request.user in lab.members):
-        reservation_allowed = True
+        reservation_forbidden = False
+    elif not lab.is_active:
+        reservation_forbidden = "Sorry, this lab is not currently accepting new reservations."
+    elif not lab.is_public and request.user not in lab.members:
+        reservation_forbidden = "Sorry, only members can reserve time in this lab."
+    elif lab.max_rsv_per_user and lab.reservations.filter(user=request.user, end_time__gt=timezone.now()).count() >= lab.max_rsv_per_user:
+        reservation_forbidden = "Sorry, you have reached the maximum number of reservations for this lab ({0}).".format(lab.max_rsv_per_user)
     else:
-        reservation_allowed = False
+        reservation_forbidden = False
 
     # Creating a new Reservation
-    if reservation_allowed and request.method == 'POST':
+    if not reservation_forbidden and request.method == 'POST':
         reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'], request.POST)
         if reservation_form.is_valid():
             # Create a full datetime from the individual date and time fields, then make it timezone-aware
@@ -77,7 +82,7 @@ def schedule(request, lab_id):
                     r.pods.add(lab.pods.get(id=pod_id))
             messages.success(request, "Your reservation has been created.")
             return redirect(reverse('scheduler_reservation', kwargs={'rsv_id': r.id}))
-    elif reservation_allowed:
+    elif not reservation_forbidden:
         reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'])
     else:
         reservation_form = None
@@ -85,6 +90,7 @@ def schedule(request, lab_id):
     return render(request, 'labs/schedule.html', {
         'lab': lab,
         'lab_open_hours': [h.hour for h in lab.get_open_hours(tz=request.session.get('django_timezone'))],
+        'reservation_forbidden': reservation_forbidden,
         'reservation_form': reservation_form,
         's': schedule,
         'current_time': datetime.now(),

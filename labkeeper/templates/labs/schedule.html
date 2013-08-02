@@ -123,15 +123,15 @@ div.unwrap {
 <div class="container">
   <div class="row">
     <div class="span3">
-      {% if reservation_form %}
+      {% if reservation_forbidden %}
+      <div class="alert alert-error">{{ reservation_forbidden }}</div>
+      {% else %}
       <h5>Reserve this Lab!</h5>
       <form action="." method="post">
       {% csrf_token %}
       {{ reservation_form|as_bootstrap }}
       <button type="submit" class="btn btn-primary">Create</button>
       </form>
-      {% else %}
-      <p>Sorry, this lab may only be reserved by members.</p>
       {% endif %}
     </div>
     <div class="span9">
