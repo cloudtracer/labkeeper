@@ -84,7 +84,7 @@ def schedule(request, lab_id):
 
     return render(request, 'labs/schedule.html', {
         'lab': lab,
-        'lab_open_hours': [int(h.split(':')[0]) for h in lab.get_open_hours(tz=request.session.get('django_timezone'))],
+        'lab_open_hours': [h.hour for h in lab.get_open_hours(tz=request.session.get('django_timezone'))],
         'reservation_form': reservation_form,
         's': schedule,
         'current_time': datetime.now(),

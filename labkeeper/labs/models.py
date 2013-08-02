@@ -57,15 +57,17 @@ class Lab(models.Model):
 
     # Return a list of tz-aware hours during which the Lab is available each day
     def get_open_hours(self, tz=pytz.UTC):
+        def make_hours(rng=range(0, 24)):
+            return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).time() for h in rng]
         if self.opening_time and not self.closing_time:
-            return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).strftime("%H:%M") for h in range(self.opening_time, 24)]
+            return make_hours(range(self.opening_time, 24))
         if not self.opening_time and self.closing_time:
-            return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).strftime("%H:%M") for h in range(0, self.closing_time)]
+            return make_hours(range(0, self.closing_time))
         if self.opening_time < self.closing_time:
-            return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).strftime("%H:%M") for h in range(self.opening_time, self.closing_time)]
+            return make_hours(range(self.opening_time, self.closing_time))
         if self.opening_time > self.closing_time:
-            return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).strftime("%H:%M") for h in range(self.opening_time, 24) + range(0, self.closing_time)]
-        return [datetime.combine(date.today(), time(h, tzinfo=pytz.UTC)).astimezone(tz).strftime("%H:%M") for h in range(0, 24)]
+            return make_hours(range(self.opening_time, 24) + range(0, self.closing_time))
+        return make_hours()
 
 
 class Pod(models.Model):
