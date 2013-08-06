@@ -1,12 +1,24 @@
 {% extends '_base.html' %}
+{% load easy_maps_tags %}
 
 {% block content %}
 {% include 'labs/_nav_header.html' %}
 <div class="row">
-  <div class="span5">
+  <div class="span6">
     <p>{{ lab.profile|safe }}</p>
   </div>
-  <div class="span7">
+  <div class="span6">
+    <div class="row-fluid">
+      <div class="span6">
+        <h5 class="muted">Country</h5>
+        <h2>{{ lab.country.name }}</h2>
+      </div>
+      <div class="span6">
+        <h5 class="muted">Location</h5>
+        <h2>{{ lab.location }}</h2>
+      </div>
+    </div>
+    {% easy_map lab.map_address 570 300 5 %}
     {% for pod in lab.pods.all %}
     <h5>Pod {{ pod }}</h5>
     <table class="table table-striped">
@@ -23,6 +35,10 @@
           <td>{{ device.name }}</td>
           <td>{{ device.get_type_display }}</td>
           <td>{{ device.cs_port }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3">No devices</td>
         </tr>
       {% endfor %}
       </tbody>

@@ -7,6 +7,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from django_bleach.models import BleachField
+from django_countries import CountryField
 
 class Lab(models.Model):
     """
@@ -21,6 +22,9 @@ class Lab(models.Model):
     HOURS = [(i, "{0}:00".format(i)) for i in range(24)]
 
     name = models.CharField('Name', max_length=80, unique=True)
+    country = CountryField()
+    location = models.CharField('Location', max_length=80, blank=True, help_text="City, state, and/or region where the lab is physically located")
+    founded = models.DateField('Founded', auto_now_add=True, editable=False)
     is_public = models.BooleanField('Public', default=True, help_text="Reservation is open to non-members")
     is_active = models.BooleanField('Active', default=False, help_text="This lab is open for new reservations")
     allow_multipod = models.BooleanField('Multi-pod reservations', default=True, help_text="Allow a user to reserve multiple pods at once")
@@ -55,6 +59,12 @@ class Lab(models.Model):
     def _get_owners(self):
         return [m.user for m in self.memberships.filter(role=Membership.OWNER)]
     owners = property(_get_owners)
+
+    def _get_map_address(self):
+        if self.location:
+            return "{0}, {1}".format(self.location, self.country)
+        return self.country
+    map_address = property(_get_map_address)
 
     # Return a list of tz-aware hours during which the Lab is available each day
     def get_open_hours(self, tz=pytz.UTC):

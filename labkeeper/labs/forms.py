@@ -7,7 +7,11 @@ class LabForm(forms.ModelForm):
 
     class Meta:
         model = Lab
-        fields = ['name', 'is_public', 'is_active', 'allow_multipod', 'max_rsv_per_user', 'min_reservation', 'max_reservation', 'opening_time', 'closing_time', 'profile']
+        fields = ['name', 'country', 'location',
+                  'is_public', 'is_active', 'allow_multipod',
+                  'max_rsv_per_user', 'min_reservation', 'max_reservation',
+                  'opening_time', 'closing_time',
+                  'profile']
 
 
 class PodForm(forms.ModelForm):

@@ -134,6 +134,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'south',
+    'easy_maps',
     'debug_toolbar',
 
     # Forms stuff
