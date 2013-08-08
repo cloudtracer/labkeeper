@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     # Native apps
     url(r'^labs/', include('labs.urls')),
     url(r'^reservations/', include('scheduler.urls')),
+    url(r'^users/', include('users.urls')),
 
     # TinyMCE
     url(r'^tinymce/', include('tinymce.urls')),

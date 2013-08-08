@@ -1,0 +1,61 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<h2>{{ profile.user }}</h2>
+<div class="row">
+  <div class="span7">
+    <div class="row-fluid">
+      <div class="span3 muted">Name</div>
+      <div class="span9">{{ profile.user.first_name }} {{ profile.user.last_name }}</div>
+    </div>
+    <div class="row-fluid">
+      <div class="span3 muted">Date joined</div>
+      <div class="span9">{{ profile.user.date_joined }}</div>
+    </div>
+    <div class="row-fluid">
+      <div class="span3 muted">Last active</div>
+      <div class="span9">{% if profile.last_active %}{{ profile.last_active }}{% else %}Never{% endif %}</div>
+    </div>
+    {% ifequal profile.user request.user %}
+    <div class="row-fluid">
+      <div class="span3 muted">Email</div>
+      <div class="span9">{{ profile.user.email }} <span class="label label-info">private</span></div>
+    </div>
+    {% endifequal %}
+    <div class="row-fluid">
+      <div class="span3 muted">Country</div>
+      <div class="span9">{{ profile.country.name }}</div>
+    </div>
+    <div class="row-fluid">
+      <div class="span3 muted">Location</div>
+      <div class="span9">{{ profile.location }}</div>
+    </div>
+    <div class="row-fluid">
+      <div class="span3 muted">Time zone</div>
+      <div class="span9">{{ profile.get_timezone_display }}</div>
+    </div>
+    {% if profile.twitter %}
+    <div class="row-fluid">
+      <div class="span3 muted">Twitter</div>
+      <div class="span9"><a href="http://twitter.com/{{ profile.twitter }}">@{{ profile.twitter }}</a></div>
+    </div>
+    {% endif %}
+    {% if profile.facebook %}
+    <div class="row-fluid">
+      <div class="span3 muted">Facebook</div>
+      <div class="span9"><a href="http://facebook.com/{{ profile.facebook }}">{{ profile.facebook }}</a></div>
+    </div>
+    {% endif %}
+  </div>
+  <div class="span5">
+    <h4>Memberships</h4>
+    <ul>
+      {% for m in profile.user.memberships.all %}<li><a href="{{ m.lab.get_absolute_url }}">{{ m.lab }}</a> ({{ m.get_role_display }})</li>{% endfor %}
+    </ul>
+    <h4>Upcoming Reservations</h4>
+    <ul>
+      {% for r in profile.user.reservations.all %}<li><a href="{{ r.lab.get_absolute_url }}">{{ r.lab }}</a> - {{ r.start_time }}</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
