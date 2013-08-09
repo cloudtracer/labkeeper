@@ -16,8 +16,8 @@ TIMEZONE_CHOICES = [(tz, timezone.now().astimezone(pytz.timezone(tz)).strftime("
                     for tz, name in settings.SUPPORTED_TIMEZONES.items()]
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
-    last_active = models.DateTimeField('Last active', blank=True, null=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile', editable=False)
+    last_active = models.DateTimeField('Last active', blank=True, null=True, editable=False)
     birth_date = models.DateField('Birth date', blank=True, null=True)
     gender = models.PositiveSmallIntegerField('Gender', choices=GENDER_CHOICES, blank=True, null=True)
     country = CountryField(blank=True)

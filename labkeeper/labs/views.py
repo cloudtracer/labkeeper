@@ -1,4 +1,3 @@
-import pytz
 from datetime import datetime
 from dateutil import parser
 
@@ -38,10 +37,6 @@ def lab(request, lab_id):
 def schedule(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
-
-    # Hack to set request's timezone
-    request.session['django_timezone'] = pytz.timezone('US/Eastern')
-    #request.session['django_timezone'] = pytz.timezone('Canada/Newfoundland')
 
     # Generate the Lab's schedule for the next seven days
     schedule = Schedule(lab, tz=request.session.get('django_timezone'))
@@ -119,9 +114,9 @@ def edit_lab(request, lab_id):
     if request.method == 'POST':
         form = LabForm(request.POST, instance=lab)
         if form.is_valid():
-            p = form.save()
-            p.last_edited_by = request.user
-            p.save()
+            l = form.save()
+            l.last_edited_by = request.user
+            l.save()
             messages.success(request, "Your changes have been saved.")
             return redirect(reverse('labs_edit_lab', kwargs={'lab_id': lab.id}))
     else:
