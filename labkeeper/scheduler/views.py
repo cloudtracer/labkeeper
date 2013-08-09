@@ -33,9 +33,9 @@ def reservation_list(request, username=None):
 
     if username:
         user = get_object_or_404(User, username=username)
-        rsv_list = user.reservations.filter(end_time__gt=timezone.now())
+        rsv_list = user.reservations.upcoming()
     else:
-        rsv_list = request.user.reservations.filter(end_time__gt=timezone.now())
+        rsv_list = request.user.reservations.upcoming()
 
     return render(request, 'scheduler/reservation_list.html', {
         'username': username,

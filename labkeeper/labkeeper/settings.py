@@ -109,6 +109,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'labkeeper.middleware.TimezoneMiddleware',
+    'users.middleware.UserTracking',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
@@ -141,7 +142,7 @@ INSTALLED_APPS = (
     'django_forms_bootstrap',
     'widget_tweaks',
 
-    # User content
+    # User-generated content
     'django_bleach',
     'tinymce',
 
@@ -152,11 +153,9 @@ INSTALLED_APPS = (
     'users',
 )
 
-# Django debug toolbar
-INTERNAL_IPS = ('127.0.0.1',)
-DEBUG_TOOLBAR_CONFIG = {
-    'INTERCEPT_REDIRECTS': False,
-}
+# django-registration
+REGISTRATION_OPEN = True
+ACCOUNT_ACTIVATION_DAYS = 7
 
 # Bleach
 BLEACH_ALLOWED_TAGS = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'i', 'li', 'ol',

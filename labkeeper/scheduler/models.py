@@ -11,6 +11,11 @@ from django.utils.datastructures import SortedDict
 from labs.models import Lab, Pod
 
 
+class ReservationManager(models.Manager):
+
+    def upcoming(self):
+        return super(ReservationManager, self).get_query_set().filter(end_time__gt=timezone.now())
+
 class Reservation(models.Model):
     """
     A reservation made by a User for a Pod. Reservations must be made on UTC hours on a length of n hours.
@@ -25,6 +30,8 @@ class Reservation(models.Model):
     duration = models.PositiveSmallIntegerField('Duration (hours)')
     end_time = models.DateTimeField('End time', editable=False, null=True)
     password = models.CharField('Password', max_length=16)
+
+    objects = ReservationManager()
 
     class Meta:
         ordering = ['start_time']

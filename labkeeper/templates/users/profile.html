@@ -10,7 +10,7 @@
     </div>
     <div class="row-fluid">
       <div class="span3 muted">Date joined</div>
-      <div class="span9">{{ profile.user.date_joined }}</div>
+      <div class="span9">{{ profile.user.date_joined|date }}</div>
     </div>
     <div class="row-fluid">
       <div class="span3 muted">Last active</div>
@@ -54,7 +54,7 @@
     </ul>
     <h4>Upcoming Reservations</h4>
     <ul>
-      {% for r in profile.user.reservations.all %}<li><a href="{{ r.lab.get_absolute_url }}">{{ r.lab }}</a> - {{ r.start_time }}</li>{% endfor %}
+      {% for r in profile.user.reservations.upcoming %}<li><a href="{{ r.lab.get_absolute_url }}">{{ r.lab }}</a> - {{ r.start_time }}</li>{% endfor %}
     </ul>
   </div>
 </div>
