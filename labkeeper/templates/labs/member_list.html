@@ -1,42 +1,34 @@
 {% extends '_base.html' %}
 {% load widget_tweaks %}
+{% load render_table from django_tables2 %}
 
 {% block content %}
 {% include 'labs/_nav_header.html' %}
 <div class="row">
   <div class="span8">
     <h3>{{ lab }} Members</h3>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Member</th>
-          <th>Joined</th>
-          <th>Role</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for m in member_list %}
-        <tr>
-          <td>{{ m.user }}</td>
-          <td>{{ m.joined }}</td>
-          <td>{{ m.get_role_display }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <form action="." method="post">
+      {% csrf_token %}
+    {% render_table table %}
+    <div class="form-actions form-inline">
+      {% render_field memberships_form.action %}
+      <input type="submit" name="membership_management" value="Go" class="btn btn-primary" />
+    </div>
+    </form>
   </div>
   <div class="span4">
-    {% if request.user in lab.admins %}
+    {% if request.user in lab.admins and not lab.is_public %}
+    <form class="form-inline well" action="." method="post">
+    <p>As an administrator of a private lab, you can invite members to join your lab by entering their username below.</p>
     <div class="control-group{% if invitation_form.member.errors %} error{% endif %}">
-    <form class="form-inline" action="." method="post">
-    {% csrf_token %}
-    {% render_field invitation_form.member %}
-    <button type="submit" class="btn btn-primary">Invite Member</button>
-    {% for error in invitation_form.member.errors %}
-      <span class="help-inline">{{ error }}</span>
-    {% endfor %}
-    </form>
+      {% csrf_token %}
+      {% render_field invitation_form.member class+="input-medium" %}
+      <input type="submit" name="send_invitation" value="Invite User" class="btn btn-primary" />
+      {% for error in invitation_form.member.errors %}
+        <span class="help-inline">{{ error }}</span>
+      {% endfor %}
     </div>
+    </form>
     {% endif %}
   </div>
 </div>

@@ -1,5 +1,6 @@
 from datetime import datetime
 from dateutil import parser
+from django_tables2 import RequestConfig
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,6 +16,7 @@ from scheduler.forms import ReservationForm
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Membership, Pod
 from labs.forms import *
+from labs.tables import MembershipTable
 
 
 def default(request):
@@ -97,7 +99,20 @@ def member_list(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
-    if request.method == 'POST':
+    # Membership management
+    if request.POST.get('membership_management'):
+        memberships_form = MembershipManagementForm(lab, request.POST)
+        if memberships_form.is_valid():
+            if memberships_form.cleaned_data['action'] == 'remove':
+                for m in memberships_form.cleaned_data['selection']:
+                    m.delete()
+                messages.info(request, "Removed {0} memberships".format(len(memberships_form.cleaned_data['selection'])))
+            memberships_form = MembershipManagementForm(lab)
+    else:
+        memberships_form = MembershipManagementForm(lab)
+
+    # Sending an invitation
+    if request.POST.get('send_invitation'):
         invitation_form = MembershipInvitationForm(lab, request.POST)
         if invitation_form.is_valid():
 
@@ -108,12 +123,17 @@ def member_list(request, lab_id):
             messages.success(request, "You have invited {0} to {1}.".format(invitation_form.cleaned_data['member'], lab.name))
             return redirect(reverse('labs_member_list', kwargs={'lab_id': lab.id}))
     else:
-        invitation_form = MembershipInvitationForm(lab=lab)
+        invitation_form = MembershipInvitationForm(lab)
+
+    # Build the Memberships table
+    table = MembershipTable(lab.memberships.order_by('-role', '-joined'))
+    RequestConfig(request, paginate={'per_page': 30}).configure(table)
 
     return render(request, 'labs/member_list.html', {
         'lab': lab,
         'invitation_form': invitation_form,
-        'member_list': lab.memberships.order_by('-role', '-joined'),
+        'memberships_form': memberships_form,
+        'table': table,
         'nav_labs': 'members',
         })
 

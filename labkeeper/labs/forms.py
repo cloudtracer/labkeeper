@@ -107,6 +107,22 @@ class ConsoleServerPortForm(forms.ModelForm):
         return cleaned_data
 
 
+class MembershipManagementForm(forms.Form):
+
+    action = forms.ChoiceField(choices=(
+        ('remove', 'Remove'),
+    ))
+
+    def __init__(self, lab, *args, **kwargs):
+        super(MembershipManagementForm, self).__init__(*args, **kwargs)
+        self.lab = lab
+
+        self.fields['selection'] = forms.ModelMultipleChoiceField(
+            queryset = Membership.objects.filter(lab=self.lab),
+            widget = forms.CheckboxSelectMultiple,
+            )
+
+
 class MembershipInvitationForm(forms.Form):
 
     member = forms.CharField(required=True)
