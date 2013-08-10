@@ -14,6 +14,15 @@ class LabForm(forms.ModelForm):
                   'profile']
 
 
+class NewLabForm(forms.ModelForm):
+
+    class Meta:
+        model = Lab
+        fields = ['name', 'country', 'location', 'is_public',
+                  'max_rsv_per_user', 'min_reservation', 'max_reservation',
+                  'opening_time', 'closing_time']
+
+
 class PodForm(forms.ModelForm):
 
     class Meta:

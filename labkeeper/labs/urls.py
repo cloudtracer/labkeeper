@@ -4,8 +4,11 @@ urlpatterns = patterns('labs',
     # Lab list
     url(r'^$', 'views.default', name='labs'),
 
+    # Lab creation
+    url(r'^new/$', 'views.create_lab', name='labs_create_lab'),
+
     # Lab info
-    url(r'^(?P<lab_id>\d+)/$', 'views.lab', name='lab'),
+    url(r'^(?P<lab_id>\d+)/$', 'views.lab', name='labs_lab'),
     url(r'^(?P<lab_id>\d+)/schedule/$', 'views.schedule', name='labs_schedule'),
     url(r'^(?P<lab_id>\d+)/members/$', 'views.member_list', name='labs_member_list'),
 

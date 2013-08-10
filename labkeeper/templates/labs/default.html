@@ -11,11 +11,14 @@
 </div>
 {% for l in lab_list %}
 <div class="row">
-  <div class="span3"><h4><a href="{% url 'lab' l.id %}">{{ l }}</a></h4></div>
+  <div class="span3"><h4><a href="{% url 'labs_lab' l.id %}">{{ l }}</a></h4></div>
   <div class="span3"><h4>{{ l.country.name }}</h4></div>
   <div class="span2"><h4>{{ l.founded }}</h4></div>
   <div class="span2"><h4>{{ l.pods.count }}</h4></div>
   <div class="span2"><h4>{{ l.members|length }}</h4></div>
 </div>
 {% endfor %}
+{% if request.user.is_authenticated %}
+<a href="{% url 'labs_create_lab' %}" class="btn btn-large btn-success">Create a Lab</a>
+{% endif %}
 {% endblock %}

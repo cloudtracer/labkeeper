@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil import parser
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.forms.models import modelformset_factory, inlineformset_factory
@@ -11,8 +12,8 @@ from django.utils import timezone
 
 from scheduler.models import Schedule
 
-from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Pod
-from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, NewConsoleServerForm, PodForm
+from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Membership, Pod
+from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, NewConsoleServerForm, NewLabForm, PodForm
 from scheduler.models import Reservation
 from scheduler.forms import ReservationForm
 
@@ -104,6 +105,33 @@ def member_list(request, lab_id):
         })
 
 
+@login_required
+def create_lab(request):
+
+    # Processing a submitted form
+    if request.method == 'POST':
+        form = NewLabForm(request.POST)
+        if form.is_valid():
+
+            # Create the new Lab
+            lab = form.save()
+            lab.last_edited_by = request.user
+            lab.save()
+
+            # Assign the current user as an owner
+            Membership.objects.create(user=request.user, lab=lab, role=Membership.OWNER)
+
+            messages.success(request, "Your lab has been created!")
+            return redirect(reverse('labs_edit_lab', kwargs={'lab_id': lab.id}))
+    else:
+        form = NewLabForm()
+
+    return render(request, 'labs/create_lab.html', {
+        'form': form,
+        })
+
+
+@login_required
 def edit_lab(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
@@ -130,6 +158,7 @@ def edit_lab(request, lab_id):
         })
 
 
+@login_required
 def manage_pods(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
@@ -155,6 +184,7 @@ def manage_pods(request, lab_id):
         })
 
 
+@login_required
 def edit_pod(request, pod_id):
 
     pod = get_object_or_404(Pod, id=pod_id)
@@ -178,6 +208,7 @@ def edit_pod(request, pod_id):
         })
 
 
+@login_required
 def delete_pod(request, pod_id):
 
     pod = get_object_or_404(Pod, id=pod_id)
@@ -194,6 +225,7 @@ def delete_pod(request, pod_id):
     return redirect(reverse('labs_manage_pods', kwargs={'lab_id': pod.lab.id}))
 
 
+@login_required
 def manage_consoleservers(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
@@ -231,6 +263,7 @@ def manage_consoleservers(request, lab_id):
         })
 
 
+@login_required
 def edit_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
@@ -267,6 +300,7 @@ def edit_consoleserver(request, cs_id):
         })
 
 
+@login_required
 def delete_consoleserver(request, cs_id):
 
     cs = get_object_or_404(ConsoleServer, id=cs_id)
@@ -283,6 +317,7 @@ def delete_consoleserver(request, cs_id):
     return redirect(reverse('labs_manage_consoleservers', kwargs={'lab_id': cs.lab.id}))
 
 
+@login_required
 def manage_devices(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
