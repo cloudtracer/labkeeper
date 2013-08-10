@@ -16,7 +16,7 @@ from scheduler.forms import ReservationForm
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Membership, Pod
 from labs.forms import *
-from labs.tables import MembershipTable
+from labs.tables import *
 
 
 def default(request):
@@ -99,34 +99,45 @@ def member_list(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
-    # Membership management
-    if request.POST.get('membership_management'):
-        memberships_form = MembershipManagementForm(lab, request.POST)
-        if memberships_form.is_valid():
-            if memberships_form.cleaned_data['action'] == 'remove':
-                for m in memberships_form.cleaned_data['selection']:
-                    m.delete()
-                messages.info(request, "Removed {0} memberships".format(len(memberships_form.cleaned_data['selection'])))
+    # Admin view
+    if request.user in lab.admins:
+
+        # Membership management
+        if request.POST.get('membership_management'):
+            memberships_form = MembershipManagementForm(lab, request.POST)
+            if memberships_form.is_valid():
+                if memberships_form.cleaned_data['action'] == 'remove':
+                    for m in memberships_form.cleaned_data['selection']:
+                        m.delete()
+                    messages.info(request, "Removed {0} memberships".format(len(memberships_form.cleaned_data['selection'])))
+                memberships_form = MembershipManagementForm(lab)
+        else:
             memberships_form = MembershipManagementForm(lab)
+
+        # Sending an invitation
+        if request.POST.get('send_invitation'):
+            invitation_form = MembershipInvitationForm(lab, request.POST)
+            if invitation_form.is_valid():
+
+                # Create the new MembershipInvitation
+                recipient = User.objects.get(username=invitation_form.cleaned_data['member'])
+                MembershipInvitation.objects.create(sender=request.user, recipient=recipient, lab=lab)
+
+                messages.success(request, "You have invited {0} to {1}.".format(invitation_form.cleaned_data['member'], lab.name))
+                return redirect(reverse('labs_member_list', kwargs={'lab_id': lab.id}))
+        else:
+            invitation_form = MembershipInvitationForm(lab)
+
+        # Memberships management table
+        table = MembershipManagementTable(lab.memberships.order_by('-role', '-joined'))
+
+    # Non-admin view
     else:
-        memberships_form = MembershipManagementForm(lab)
+        memberships_form = None
+        invitation_form = None
+        table = MembershipTable(lab.memberships.order_by('-role', '-joined'))
 
-    # Sending an invitation
-    if request.POST.get('send_invitation'):
-        invitation_form = MembershipInvitationForm(lab, request.POST)
-        if invitation_form.is_valid():
-
-            # Create the new MembershipInvitation
-            recipient = User.objects.get(username=invitation_form.cleaned_data['member'])
-            MembershipInvitation.objects.create(sender=request.user, recipient=recipient, lab=lab)
-
-            messages.success(request, "You have invited {0} to {1}.".format(invitation_form.cleaned_data['member'], lab.name))
-            return redirect(reverse('labs_member_list', kwargs={'lab_id': lab.id}))
-    else:
-        invitation_form = MembershipInvitationForm(lab)
-
-    # Build the Memberships table
-    table = MembershipTable(lab.memberships.order_by('-role', '-joined'))
+    # Prep the Memberships table
     RequestConfig(request, paginate={'per_page': 30}).configure(table)
 
     return render(request, 'labs/member_list.html', {

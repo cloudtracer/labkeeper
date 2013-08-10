@@ -7,6 +7,7 @@
 <div class="row">
   <div class="span8">
     <h3>{{ lab }} Members</h3>
+    {% if request.user in lab.admins %}
     <form action="." method="post">
       {% csrf_token %}
     {% render_table table %}
@@ -15,11 +16,15 @@
       <input type="submit" name="membership_management" value="Go" class="btn btn-primary" />
     </div>
     </form>
+    {% else %}
+    {% render_table table %}
+    {% endif %}
   </div>
   <div class="span4">
     {% if request.user in lab.admins and not lab.is_public %}
     <form class="form-inline well" action="." method="post">
-    <p>As an administrator of a private lab, you can invite members to join your lab by entering their username below.</p>
+    <h4>Add some friends!</h4>
+    <p>As an administrator of a private lab, you can other registered users to join your lab by entering their username below.</p>
     <div class="control-group{% if invitation_form.member.errors %} error{% endif %}">
       {% csrf_token %}
       {% render_field invitation_form.member class+="input-medium" %}
