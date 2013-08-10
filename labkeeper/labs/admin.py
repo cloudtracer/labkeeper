@@ -36,9 +36,14 @@ class MembershipAdmin(admin.ModelAdmin):
     list_display = ('user', 'lab', 'role')
 
 
+class MembershipInvitationAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'recipient', 'lab', 'sent')
+
+
 admin.site.register(Lab, LabAdmin)
 admin.site.register(Pod, PodAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(ConsoleServerPort, ConsoleServerPortAdmin)
 admin.site.register(ConsoleServer, ConsoleServerAdmin)
 admin.site.register(Membership, MembershipAdmin)
+admin.site.register(MembershipInvitation, MembershipInvitationAdmin)

@@ -1,6 +1,7 @@
 from django import forms
+from django.contrib.auth.models import User
 
-from labs.models import Device, ConsoleServer, ConsoleServerPort, Lab, Pod
+from labs.models import ConsoleServer, ConsoleServerPort, Lab, Membership, MembershipInvitation, Pod
 
 
 class LabForm(forms.ModelForm):
@@ -104,3 +105,34 @@ class ConsoleServerPortForm(forms.ModelForm):
             self._errors['ssh_port'] = self.error_class([msg])
 
         return cleaned_data
+
+
+class MembershipInvitationForm(forms.Form):
+
+    member = forms.CharField(required=True)
+
+    def __init__(self, lab, *args, **kwargs):
+        super(MembershipInvitationForm, self).__init__(*args, **kwargs)
+        self.lab = lab
+
+        # Error messages
+        self.fields['member'].error_messages['required'] = "Please specify a valid username."
+
+    def clean_member(self):
+        username = self.cleaned_data['member']
+
+        # Validate provided username
+        try:
+            u = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise forms.ValidationError("Please specify a valid username.")
+
+        # Check that the specified User has not already been invited to this Lab
+        if MembershipInvitation.objects.filter(recipient=u, lab=self.lab):
+            raise forms.ValidationError("{0} has already been invited to this lab.".format(u))
+
+        # Check that the specified User is not already a member of this Lab
+        elif Membership.objects.filter(user=u, lab=self.lab):
+            raise forms.ValidationError("{0} is already a member of this lab.".format(u))
+
+        return username

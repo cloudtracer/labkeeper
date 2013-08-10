@@ -46,7 +46,7 @@ class Lab(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('lab', kwargs={'lab_id': self.id})
+        return reverse('labs_lab', kwargs={'lab_id': self.id})
 
     def _get_members(self):
         return [m.user for m in self.memberships.all()]
@@ -216,3 +216,26 @@ class Membership(models.Model):
 
     def __unicode__(self):
         return "{0} is a(n) {1} of {2}".format(self.user, self.get_role_display(), self.lab)
+
+
+class MembershipInvitation(models.Model):
+    """
+    An invitation from an owner or admin of a private lab to a non-member.
+    """
+    sender = models.ForeignKey(User, editable=False)
+    recipient = models.ForeignKey(User, related_name='membership_invitations')
+    lab = models.ForeignKey(Lab, related_name='membership_invitations', editable=False)
+    sent = models.DateTimeField('Time sent', auto_now_add=True, editable=False)
+
+    class Meta:
+        unique_together = (
+            ('recipient', 'lab'),
+        )
+
+    def __unicode__(self):
+        return "{0} invited {1} to {2}".format(self.sender, self.recipient, self.lab)
+
+    def accept(self):
+        """User has accepted the invitation"""
+        Membership.objects.create(user = self.recipient, lab = self.lab)
+        self.delete()

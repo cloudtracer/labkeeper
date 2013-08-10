@@ -48,13 +48,29 @@
     {% endif %}
   </div>
   <div class="span5">
+    {% ifequal request.user profile.user %}
+    {% with profile.user.membership_invitations.all as invitations %}
+    {% if invitations %}
+    <h4>Invitations</h4>
+    <ul>
+      {% for i in invitations %}<li>{{ i.sender }} invited you to <a href="{{ i.lab.get_absolute_url }}">{{ i.lab }}</a><br />
+      <a href="{% url 'labs_invitation_response' i.id 'accept' %}" class="btn btn-mini btn-success">Accept</a>
+      <a href="{% url 'labs_invitation_response' i.id 'decline' %}" class="btn btn-mini btn-danger" onclick="return confirm('Decline the invitation to {{ i.lab }}?')">Decline</a></li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    {% endifequal %}
     <h4>Memberships</h4>
     <ul>
-      {% for m in profile.user.memberships.all %}<li><a href="{{ m.lab.get_absolute_url }}">{{ m.lab }}</a> ({{ m.get_role_display }})</li>{% endfor %}
+      {% for m in profile.user.memberships.all %}<li><a href="{{ m.lab.get_absolute_url }}">{{ m.lab }}</a> ({{ m.get_role_display }})</li>
+      {% empty %}<li>None yet</li>
+      {% endfor %}
     </ul>
     <h4>Upcoming Reservations</h4>
     <ul>
-      {% for r in profile.user.reservations.upcoming %}<li><a href="{{ r.lab.get_absolute_url }}">{{ r.lab }}</a> - {{ r.start_time }}</li>{% endfor %}
+      {% for r in profile.user.reservations.upcoming %}<li><a href="{{ r.get_absolute_url }}">{{ r.lab }} - {{ r.start_time }}</a></li>
+      {% empty %}<li>No upcoming reservations</li>
+      {% endfor %}
     </ul>
   </div>
 </div>

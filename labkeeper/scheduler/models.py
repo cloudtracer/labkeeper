@@ -12,9 +12,10 @@ from labs.models import Lab, Pod
 
 
 class ReservationManager(models.Manager):
+    use_for_related_fields = True
 
     def upcoming(self):
-        return super(ReservationManager, self).get_query_set().filter(end_time__gt=timezone.now())
+        return self.get_query_set().filter(end_time__gt=timezone.now())
 
 class Reservation(models.Model):
     """

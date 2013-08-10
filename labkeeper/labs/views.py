@@ -6,16 +6,15 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Count
 from django.forms.models import modelformset_factory, inlineformset_factory
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from scheduler.models import Schedule
+from scheduler.models import Reservation, Schedule
+from scheduler.forms import ReservationForm
 
 from labs.models import ConsoleServer, ConsoleServerPort, Device, Lab, Membership, Pod
-from labs.forms import ConsoleServerForm, ConsoleServerPortForm, LabForm, NewConsoleServerForm, NewLabForm, PodForm
-from scheduler.models import Reservation
-from scheduler.forms import ReservationForm
+from labs.forms import *
 
 
 def default(request):
@@ -98,11 +97,44 @@ def member_list(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
 
+    if request.method == 'POST':
+        invitation_form = MembershipInvitationForm(lab, request.POST)
+        if invitation_form.is_valid():
+
+            # Create the new MembershipInvitation
+            recipient = User.objects.get(username=invitation_form.cleaned_data['member'])
+            MembershipInvitation.objects.create(sender=request.user, recipient=recipient, lab=lab)
+
+            messages.success(request, "You have invited {0} to {1}.".format(invitation_form.cleaned_data['member'], lab.name))
+            return redirect(reverse('labs_member_list', kwargs={'lab_id': lab.id}))
+    else:
+        invitation_form = MembershipInvitationForm(lab=lab)
+
     return render(request, 'labs/member_list.html', {
         'lab': lab,
-        'member_list': lab.memberships.all(),
+        'invitation_form': invitation_form,
+        'member_list': lab.memberships.order_by('-role', '-joined'),
         'nav_labs': 'members',
         })
+
+
+def invitation_response(request, invitation_id, response):
+
+    invitation = get_object_or_404(MembershipInvitation, id=invitation_id)
+    if request.user != invitation.recipient:
+        return HttpResponseForbidden()
+
+    if response == 'accept':
+        invitation.accept()
+        messages.success(request, "You are now a member of {0}!".format(invitation.lab))
+        return redirect(reverse('labs_lab', kwargs={'lab_id': invitation.lab.id}))
+    elif response == 'decline':
+        invitation.delete()
+        messages.info(request, "You have declined the invitation to {0}.".format(invitation.lab))
+        return redirect(reverse('users_profile', kwargs={'username': request.user}))
+    else:
+        # URL regex should prevent us from ever getting here
+        return Http404
 
 
 @login_required

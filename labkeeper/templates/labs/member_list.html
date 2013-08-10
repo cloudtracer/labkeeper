@@ -1,4 +1,5 @@
 {% extends '_base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
 {% include 'labs/_nav_header.html' %}
@@ -23,6 +24,20 @@
       {% endfor %}
       </tbody>
     </table>
+  </div>
+  <div class="span4">
+    {% if request.user in lab.admins %}
+    <div class="control-group{% if invitation_form.member.errors %} error{% endif %}">
+    <form class="form-inline" action="." method="post">
+    {% csrf_token %}
+    {% render_field invitation_form.member %}
+    <button type="submit" class="btn btn-primary">Invite Member</button>
+    {% for error in invitation_form.member.errors %}
+      <span class="help-inline">{{ error }}</span>
+    {% endfor %}
+    </form>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

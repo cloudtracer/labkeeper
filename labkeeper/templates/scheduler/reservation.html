@@ -29,7 +29,7 @@
   <div class="span3">
     <h5 class="muted">Lab</h5>
     <h3><a href="{{ rsv.lab.get_absolute_url }}">{{ rsv.lab }}</a></h3>
-    {% ifequal request.user rsv.user %}
+    {% if request.user == rsv.user or request.user in rsv.lab.admins %}
     <h5 class="muted">Credentials</h5>
     <div class="well">
       <div class="row-fluid">
@@ -42,7 +42,7 @@
       </div>
     </div>
     <a href="{% url 'scheduler_delete_reservation' rsv.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this reservation?')">Cancel reservation</a>
-    {% endifequal %}
+    {% endif %}
   </div>
   <div class="span9">
   <h5 class="muted">Lab Devices</h5>
