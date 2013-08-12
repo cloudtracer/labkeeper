@@ -62,7 +62,7 @@
     {% endifequal %}
     <h4>Memberships</h4>
     <ul>
-      {% for m in profile.user.memberships.all %}<li><a href="{{ m.lab.get_absolute_url }}">{{ m.lab }}</a> ({{ m.get_role_display }})</li>
+      {% for m in profile.user.memberships.all %}<li>{% if not m.lab.is_public %}<i class="icon-lock"></i> {% endif %}<a href="{{ m.lab.get_absolute_url }}">{{ m.lab }}</a> ({{ m.get_role_display }})</li>
       {% empty %}<li>None yet</li>
       {% endfor %}
     </ul>

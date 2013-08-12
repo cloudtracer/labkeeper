@@ -203,7 +203,7 @@ def edit_lab(request, lab_id):
 
     # Processing a submitted form
     if request.method == 'POST':
-        form = LabForm(request.POST, instance=lab)
+        form = LabForm(request.POST, request.FILES, instance=lab)
         if form.is_valid():
             l = form.save()
             l.last_edited_by = request.user

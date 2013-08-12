@@ -1,8 +1,5 @@
 from django.utils.datastructures import SortedDict
 
-DEBUG = False
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     ('Jeremy Stretch', 'stretch@packetlife.net'),
 )
@@ -66,7 +63,7 @@ STATIC_ROOT = '/srv/www/labkeeper.net/static_collected/'
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
-STATIC_URL = '/s/'
+STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -137,6 +134,7 @@ INSTALLED_APPS = (
     'south',
     'easy_maps',
     'django_tables2',
+    'sorl.thumbnail',
     'debug_toolbar',
 
     # Forms stuff
@@ -157,6 +155,10 @@ INSTALLED_APPS = (
 # django-registration
 REGISTRATION_OPEN = True
 ACCOUNT_ACTIVATION_DAYS = 7
+
+# sorl.thumbnail
+THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+THUMBNAIL_ENGINE = 'sorl.thumbnail.engines.pil_engine.Engine'
 
 # Bleach
 BLEACH_ALLOWED_TAGS = ['a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'i', 'li', 'ol',

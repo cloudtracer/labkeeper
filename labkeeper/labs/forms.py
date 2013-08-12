@@ -12,7 +12,7 @@ class LabForm(forms.ModelForm):
                   'is_public', 'is_active', 'allow_multipod',
                   'max_rsv_per_user', 'min_reservation', 'max_reservation',
                   'opening_time', 'closing_time',
-                  'profile']
+                  'photo', 'profile']
 
 
 class NewLabForm(forms.ModelForm):

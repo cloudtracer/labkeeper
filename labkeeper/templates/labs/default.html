@@ -1,24 +1,76 @@
 {% extends '_base.html' %}
+{% load thumbnail %}
 
 {% block content %}
-<h1>Labs!</h1>
-<div class="row">
-  <div class="span3"><h5 class="muted">Lab Name</h5></div>
-  <div class="span3"><h5 class="muted">Country</h5></div>
-  <div class="span2"><h5 class="muted">Founded</h5></div>
-  <div class="span2"><h5 class="muted">Pods</h5></div>
-  <div class="span2"><h5 class="muted">Members</h5></div>
-</div>
+<h1>Active Labs</h1>
 {% for l in lab_list %}
 <div class="row">
-  <div class="span3"><h4><a href="{% url 'labs_lab' l.id %}">{{ l }}</a></h4></div>
-  <div class="span3"><h4>{{ l.country.name }}</h4></div>
-  <div class="span2"><h4>{{ l.founded }}</h4></div>
-  <div class="span2"><h4>{{ l.pods.count }}</h4></div>
-  <div class="span2"><h4>{{ l.members|length }}</h4></div>
+  <div class="span1">
+    {% thumbnail l.photo "70x70" crop="center" as im %}
+    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-rounded" style="margin: 6px;"/>
+    {% endthumbnail %}
+  </div>
+  <div class="span3">
+    <h4><a href="{% url 'labs_lab' l.id %}">{{ l }}</a></h4>
+    {% if l.location %}{{ l.location }}<br /><small>{{ l.country.name }}</small>{% else %}{{ l.country.name }}{% endif %}
+  </div>
+  <div class="span3">
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted">Membership</small>
+      </div>
+      <div class="span6">
+        {% if l.is_public %}<span class="label label-success">Public</span>{% else %}<span class="label label-warning">Private</span>{% endif %}
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted">Founded</small>
+      </div>
+      <div class="span6">
+        {{ l.founded }}
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted">Members</small>
+      </div>
+      <div class="span6">
+        <a href="{% url 'labs_member_list' l.id %}">{{ l.members|length }}</a>
+      </div>
+    </div>
+  </div>
+  <div class="span3">
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted">Pods</small>
+      </div>
+      <div class="span6">
+        {{ l.pods.all|join:", " }}
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted"></small>
+      </div>
+      <div class="span6">
+      </div>
+    </div>
+    <div class="row-fluid">
+      <div class="span6">
+        <small class="muted"></small>
+      </div>
+      <div class="span6">
+      </div>
+    </div>
+  </div>
 </div>
+<hr />
 {% endfor %}
 {% if request.user.is_authenticated %}
-<a href="{% url 'labs_create_lab' %}" class="btn btn-large btn-success">Create a Lab</a>
+<div class="pull-right">
+  <strong>Want to share a lab of your own?</strong>
+  <a href="{% url 'labs_create_lab' %}" class="btn btn-large btn-success">Create a Lab</a>
+</div>
 {% endif %}
 {% endblock %}

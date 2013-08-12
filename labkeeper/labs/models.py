@@ -1,4 +1,5 @@
 from datetime import date, datetime, time
+import os
 import pytz
 
 from django.contrib.auth.models import User
@@ -8,6 +9,7 @@ from django.template.defaultfilters import slugify
 
 from django_bleach.models import BleachField
 from django_countries import CountryField
+from sorl.thumbnail import ImageField
 
 class Lab(models.Model):
     """
@@ -18,6 +20,10 @@ class Lab(models.Model):
     * is_active - Inactive Labs do not show in the public Labs list and cannot be reserved by non-admins.
     * allow_multipod - A User can reserve multiple Pods simultaneously.
     """
+
+    def _photo_filename(lab, filename):
+        """Generate filename for uploaded Lab photo"""
+        return "labs/photos/{0}{1}".format(lab.id, os.path.splitext(filename)[1])
 
     HOURS = [(i, "{0}:00".format(i)) for i in range(24)]
 
@@ -35,6 +41,7 @@ class Lab(models.Model):
                                                        help_text="Minimum reservation time")
     max_reservation = models.PositiveSmallIntegerField('Maximum reservation time', choices=[(i, "%d hours" % i) for i in range(1, 13)], default=6,
                                                        help_text="Maximum reservation time")
+    photo = ImageField(upload_to=_photo_filename, blank=True)
     profile = BleachField(blank=True)
     last_edited = models.DateTimeField('Last edited', auto_now=True, editable=False)
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
