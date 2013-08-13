@@ -222,6 +222,47 @@ def edit_lab(request, lab_id):
 
 
 @login_required
+def manage_topologies(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+    if request.user not in lab.owners:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = TopologyForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_topology = form.save(commit=False)
+            new_topology.lab = lab
+            new_topology.author = request.user
+            new_topology.save()
+            form = TopologyForm()
+            messages.success(request, "Your new topology has been uploaded.")
+    else:
+        form = TopologyForm()
+
+    return render(request, 'labs/manage_topologies.html', {
+        'lab': lab,
+        'topology_list': lab.topologies.all(),
+        'form': form,
+        'nav_labs': 'manage',
+        'nav_labs_manage': 'topologies',
+        })
+
+
+@login_required
+def delete_topology(request, topology_id):
+
+    topology = get_object_or_404(Topology, id=topology_id)
+    if request.user not in topology.lab.owners:
+        return HttpResponseForbidden()
+
+    topology.delete()
+    messages.success(request, "Topology '{0}' has been deleted.".format(topology.title))
+
+    return redirect(reverse('labs_manage_topologies', kwargs={'lab_id': topology.lab.id}))
+
+
+@login_required
 def manage_pods(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
@@ -235,6 +276,7 @@ def manage_pods(request, lab_id):
             new_pod.lab = lab
             new_pod.save()
             form = PodForm()
+            messages.success(request, "Created new pod {0}".format(new_pod.name))
     else:
         form = PodForm()
 

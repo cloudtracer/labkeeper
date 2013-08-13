@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from labs.models import ConsoleServer, ConsoleServerPort, Lab, Membership, MembershipInvitation, Pod
+from labs.models import ConsoleServer, ConsoleServerPort, Lab, Topology, Membership, MembershipInvitation, Pod
 
 
 class LabForm(forms.ModelForm):
@@ -152,3 +152,10 @@ class MembershipInvitationForm(forms.Form):
             raise forms.ValidationError("{0} is already a member of this lab.".format(u))
 
         return username
+
+
+class TopologyForm(forms.ModelForm):
+
+    class Meta:
+        model = Topology
+        fields = ['title', 'image']

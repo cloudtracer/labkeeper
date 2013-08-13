@@ -88,6 +88,31 @@ class Lab(models.Model):
         return make_hours()
 
 
+class Topology(models.Model):
+    """
+    An individual topology diagram for a Lab.
+    """
+    def _image_filename(topology, filename):
+        """Generate filename for uploaded image"""
+        return "labs/{0}/topologies/{1}".format(topology.lab.id, filename)
+
+    lab = models.ForeignKey(Lab, related_name='topologies', editable=False)
+    author = models.ForeignKey(User, related_name='topologies', editable=False)
+    created = models.DateTimeField('Last edited', auto_now=True, editable=False)
+    title = models.CharField('Name', max_length=80)
+    image = ImageField(upload_to=_image_filename)
+
+    class Meta:
+        ordering = ['title']
+        unique_together = (
+            ('lab', 'image'),
+        )
+        verbose_name_plural = 'topologies'
+
+    def __unicode__(self):
+        return "Topology for {0}: {1}".format(self.lab, self.image.name)
+
+
 class Pod(models.Model):
     """
     Pods are used to group Devices which belong to a common Lab and can be reserved individually.

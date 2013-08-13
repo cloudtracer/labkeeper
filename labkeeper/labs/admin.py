@@ -7,6 +7,10 @@ class LabAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_public', 'is_active')
 
 
+class TopologyAdmin(admin.ModelAdmin):
+    list_display = ('lab', 'title', 'author', 'created')
+
+
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ('name', 'pod', 'cs_port')
     readonly_fields = ('slug',)
@@ -41,6 +45,7 @@ class MembershipInvitationAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Lab, LabAdmin)
+admin.site.register(Topology, TopologyAdmin)
 admin.site.register(Pod, PodAdmin)
 admin.site.register(Device, DeviceAdmin)
 admin.site.register(ConsoleServerPort, ConsoleServerPortAdmin)

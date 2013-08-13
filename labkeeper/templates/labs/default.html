@@ -8,6 +8,7 @@
   <div class="span1">
     {% thumbnail l.photo "70x70" crop="center" as im %}
     <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-rounded" style="margin: 6px;"/>
+    {% empty %}
     {% endthumbnail %}
   </div>
   <div class="span3">

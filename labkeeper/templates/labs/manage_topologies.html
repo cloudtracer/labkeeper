@@ -1,0 +1,29 @@
+{% extends 'labs/_manage.html' %}
+{% load bootstrap_tags %}
+{% load thumbnail %}
+
+{% block lab_manage %}
+<ul class="thumbnails">
+  {% for t in topology_list %}
+  <li class="span4">
+    {% thumbnail t.image "300x200" crop="center" as im %}
+    <a href="{{ t.image.url }}" class="thumbnail"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="{{ t.title }}"></a>
+    {% endthumbnail %}
+    <h4>{{ t.title }}</h4>
+    <div class="pull-right">
+      <a href="{% url 'labs_delete_topology' t.id %}" class="btn btn-danger btn-mini" onclick="return confirm('Delete {{ t.title }} topology?')">Delete</a>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+<form class="form-horizontal" action="." method="post" enctype="multipart/form-data">
+  <fieldset>
+    <legend>Add a Lab Topology</legend>
+    {% csrf_token %}
+    {{ form|as_bootstrap }}
+  </fieldset>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Upload</button>
+  </div>
+</form>
+{% endblock %}

@@ -5,24 +5,10 @@
 {% block content %}
 {% include 'labs/_nav_header.html' %}
 <div class="row">
-  <div class="span6">
-    {% thumbnail lab.photo "400x300" crop="center" as im %}
-    <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" />
-    {% endthumbnail %}
+  <div class="span7">
     <p>{{ lab.profile|safe }}</p>
-  </div>
-  <div class="span6">
-    <div class="row-fluid">
-      <div class="span6">
-        <h5 class="muted">Country</h5>
-        <h2>{{ lab.country.name }}</h2>
-      </div>
-      <div class="span6">
-        <h5 class="muted">Location</h5>
-        <h2>{{ lab.location }}</h2>
-      </div>
-    </div>
-    {% easy_map lab.map_address 570 300 5 %}
+    <hr>
+    <h3>Lab Pods</h3>
     {% for pod in lab.pods.all %}
     <h5>Pod {{ pod }}</h5>
     <table class="table table-striped">
@@ -48,6 +34,25 @@
       </tbody>
     </table>
     {% endfor %}
+    <hr>
+    <h3>Topology Drawings</h3>
+    <ul class="thumbnails">
+      {% for t in lab.topologies.all %}
+      <li class="span3">
+        {% thumbnail t.image "300x200" crop="center" as im %}
+        <a href="{{ t.image.url }}" class="thumbnail"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" alt="{{ t.title }}"></a>
+        {% endthumbnail %}
+        <h5>{{ t.title }}</h5>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="span5">
+    {% thumbnail lab.photo "400x300" crop="center" as im %}
+    <a href="{{ lab.photo.url }}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
+    {% endthumbnail %}
+    <h3>{% if lab.location %}{{ lab.location }} <small>{{ lab.country.name }}</small>{% else %}{{ lab.country.name }}{% endif %}</h3>
+    {% easy_map lab.map_address 400 300 5 %}
   </div>
 </div>
 {% endblock %}
