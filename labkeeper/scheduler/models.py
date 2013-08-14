@@ -84,8 +84,7 @@ class Reservation(models.Model):
 
     # Generate a random password (used on Reservation creation)
     def generate_password(self):
-        # TODO: Fix this. Obviously.
-        return "foobar"
+        return User.objects.make_random_password(length=8)
 
 
 class ScheduleBlock:

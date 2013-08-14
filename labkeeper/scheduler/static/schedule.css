@@ -32,6 +32,9 @@ div.hour {
 div.closed {
   background-color: #e0e0e0;
 }
+div.now {
+  background-color: #54ee6b;
+}
 div.pod {
   float: left;
   height: 20px;

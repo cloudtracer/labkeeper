@@ -90,6 +90,10 @@ def schedule(request, lab_id):
         'reservation_forbidden': reservation_forbidden,
         'reservation_form': reservation_form,
         's': schedule,
+        'now': {
+            'day': timezone.localtime(timezone.now(), request.session.get('django_timezone')).day,
+            'hour': timezone.localtime(timezone.now(), request.session.get('django_timezone')).hour,
+            },
         'current_time': datetime.now(),
         'nav_labs': 'schedule',
         })

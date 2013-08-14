@@ -34,7 +34,7 @@
         <div class="schedrow">
           <div class="cell hour">{{ hour }}:00</div>
           {% for day, pods in days.items %}
-          <div class="cell{% if hour not in lab_open_hours %} closed{% endif %}">
+          <div class="cell{% if hour not in lab_open_hours %} closed{% endif %}{% if day.day == now.day and hour == now.hour %} now{% endif %}">
             {% for pod, block in pods.items %}
             <div class="pod podof{{ pods|length }} pod{{ pod }}">
               {% if block %}
