@@ -19,10 +19,13 @@ class ReservationForm(forms.Form):
         self.tz = tz
 
         # Allow multi-pod Reservations?
-        if lab.allow_multipod:
-            self.fields['pods'] = forms.MultipleChoiceField(choices=[(p.id, p.name) for p in lab.pods.all()], widget=forms.CheckboxSelectMultiple)
+        POD_CHOICES = lab.pods.all()
+        if len(POD_CHOICES) < 2:
+            self.fields['pods'] = forms.IntegerField(widget=forms.HiddenInput, initial=POD_CHOICES[0].id)
+        elif lab.allow_multipod:
+            self.fields['pods'] = forms.MultipleChoiceField(choices=[(p.id, p.name) for p in POD_CHOICES], widget=forms.CheckboxSelectMultiple)
         else:
-            self.fields['pods'] = forms.ChoiceField(choices=[(p.id, p.name) for p in lab.pods.all()])
+            self.fields['pods'] = forms.ChoiceField(choices=[(p.id, p.name) for p in POD_CHOICES])
 
         # Starting date
         self.fields['date'] = forms.ChoiceField(choices=[(d, d.strftime("%b %-d (%a)")) for d in schedule.get_days()])

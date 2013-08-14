@@ -59,9 +59,11 @@ def schedule(request, lab_id):
     if not reservation_forbidden and request.method == 'POST':
         reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'], request.POST)
         if reservation_form.is_valid():
+
             # Create a full datetime from the individual date and time fields, then make it timezone-aware
             start_time = parser.parse(' '.join((reservation_form.cleaned_data['date'], reservation_form.cleaned_data['time'])))
             start_time = request.session.get('django_timezone').localize(start_time)
+
             # Create the Reservation
             r = Reservation.objects.create(
                 user = request.user,
@@ -71,16 +73,20 @@ def schedule(request, lab_id):
                 start_time = start_time,
                 duration = int(reservation_form.cleaned_data['duration'])
             )
+
             # Add reserved Pod(s) to the Reservation
-            if isinstance(reservation_form.cleaned_data['pods'], basestring):
-                r.pods.add(lab.pods.get(id=reservation_form.cleaned_data['pods']))
-            else:
+            if isinstance(reservation_form.cleaned_data['pods'], list):
                 for pod_id in reservation_form.cleaned_data['pods']:
                     r.pods.add(lab.pods.get(id=pod_id))
+            else:
+                r.pods.add(lab.pods.get(id=reservation_form.cleaned_data['pods']))
+
             messages.success(request, "Your reservation has been created.")
             return redirect(reverse('scheduler_reservation', kwargs={'rsv_id': r.id}))
+
     elif not reservation_forbidden:
         reservation_form = ReservationForm(lab, schedule, request.session['django_timezone'])
+
     else:
         reservation_form = None
 
