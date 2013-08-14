@@ -19,6 +19,7 @@ class MembershipTable(tables.Table):
     def render_user(self, value):
         return mark_safe("<a href=\"{0}\">{1}</a>".format(value.get_absolute_url(), value))
 
+
 class MembershipManagementTable(MembershipTable):
     selection = tables.CheckBoxColumn(accessor="pk", orderable=False)
 

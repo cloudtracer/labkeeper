@@ -3,9 +3,9 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 
 from scheduler.models import Reservation
+from scheduler.tables import ReservationTable
 
 
 def reservation(request, rsv_id):
@@ -37,7 +37,9 @@ def reservation_list(request, username=None):
     else:
         rsv_list = request.user.reservations.upcoming()
 
+    table = ReservationTable(rsv_list)
+
     return render(request, 'scheduler/reservation_list.html', {
         'username': username,
-        'rsv_list': rsv_list,
+        'table': table,
         })

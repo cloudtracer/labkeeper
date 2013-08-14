@@ -1,29 +1,7 @@
 {% extends '_base.html' %}
+{% load render_table from django_tables2 %}
 
 {% block content %}
 <h2>{% if username %}Upcoming reservations for {{ username }}{% else %}Your upcoming reservations{% endif %}</h2>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Time</th>
-      <th>Starts In</th>
-      <th>Duration</th>
-      <th>Lab</th>
-      <th>Pod(s)</th>
-      <th>Created</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for rsv in rsv_list %}
-    <tr>
-      <td><a href="{{ rsv.get_absolute_url }}">{{ rsv.start_time }}</a></td>
-      <td>{% if rsv.time_until %}{{ rsv.time_until }}{% else %}<span class="text-success">Active now!</span>{% endif %}</td>
-      <td>{{ rsv.duration }} hours</td>
-      <td>{{ rsv.lab }}</td>
-      <td>{{ rsv.get_pods|join:", " }}</td>
-      <td>{{ rsv.created_time }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% render_table table %}
 {% endblock %}
