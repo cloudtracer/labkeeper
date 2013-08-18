@@ -86,44 +86,45 @@ class RadiusServer(server.Server):
                 self.bail("Unrecognized console server ({0})".format(pkt.source[0]))
         self.debug("Found console server: {0}".format(self.auth_counter, cs))
 
-        # Record shared secret stored by ConsoleServer
-        pkt.secret = str(cs.secret)
+        # Step 2: Shared secret validation
+        try:
+            pkt.secret = str(cs.secret)
+            pkt.PwDecrypt(pkt['User-Password'][0])
+        except:
+            self.bail("Invalid shared secret!")
 
-        # Step 2: Attempt to retrieve the User based on the given User-Name
+        # Step 3: Attempt to retrieve the User based on the given User-Name
         try:
             u = User.objects.get(username=username)
         except User.DoesNotExist:
             self.access_reject(pkt, "Invalid username")
             return
 
-        # Step 3: Attempt to locate a Reservation for this User
+        # Step 4: Attempt to locate a Reservation for this User
         try:
-            r = Reservation.objects.get(lab=cs.lab, user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]))
+            r = Reservation.objects.get(lab=cs.lab, end_time__gt=timezone.now(), user=u, password=pkt.PwDecrypt(pkt['User-Password'][0]))
         except Reservation.DoesNotExist:
-            self.access_reject(pkt, "Sorry, no reservation found for {0}").format(username)
+            self.access_reject(pkt, "Sorry, no reservation found for {0}".format(username))
             return
 
-        # Step 4: Validate that the Reservation is current
+        # Step 5: Validate that the Reservation is current
         if r.start_time > timezone.now():
             self.access_reject(pkt, "Your reservation has not started yet (scheduled for {0})".format(r.start_time))
             return
-        if r.end_time < timezone.now():
-            self.access_reject(pkt, "Your reservation has expired (ended at {0})".format(r.end_time))
-            return
 
-        # Step 5: Match the given NAS-Port to a ConsoleServerPort
+        # Step 6: Match the given NAS-Port to a ConsoleServerPort
         try:
             d = cs.ports.get(number=pkt['NAS-Port'][0]).device
         except ConsoleServerPort.DoesNotExist:
             self.access_reject(pkt, "Console server port {0} is not recognized".format(pkt['NAS-Port'][0]))
             return
 
-        # Step 6: Validate that this Device belongs to one of the reserved Pods
+        # Step 7: Validate that this Device belongs to one of the reserved Pods
         if d.pod not in r.pods.all():
             self.access_reject(pkt, "This device does not belong to one of the reserved pods")
             return
 
-        # Step 7: Success! Reward the user with an Access-Accept response
+        # Step 8: Success! Reward the user with an Access-Accept response
         self.debug("Authenticated as '{0}' (reservation {1})".format(u.username, r.id))
         reply = self.CreateReplyPacket(pkt)
         reply.code = packet.AccessAccept

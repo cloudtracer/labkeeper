@@ -122,19 +122,24 @@ def member_list(request, lab_id):
         if request.POST.get('membership_management'):
             memberships_form = memberships_form_model(lab, request.POST)
             if memberships_form.is_valid():
+
                 if memberships_form.cleaned_data['action'] == 'remove':
                     for m in memberships_form.cleaned_data['selection']:
                         m.delete()
                     messages.info(request, "Removed {0} members".format(len(memberships_form.cleaned_data['selection'])))
+
                 elif memberships_form.cleaned_data['action'] == 'promote_admin':
                     memberships_form.cleaned_data['selection'].update(role=Membership.ADMIN)
                     messages.info(request, "Promoted {0} members to admin role".format(len(memberships_form.cleaned_data['selection'])))
+
                 elif memberships_form.cleaned_data['action'] == 'promote_owner':
                     memberships_form.cleaned_data['selection'].update(role=Membership.OWNER)
                     messages.info(request, "Promoted {0} members to owner role".format(len(memberships_form.cleaned_data['selection'])))
+
                 elif memberships_form.cleaned_data['action'] == 'demote':
                     memberships_form.cleaned_data['selection'].update(role=Membership.MEMBER)
                     messages.info(request, "Demoted {0} members to regular members".format(len(memberships_form.cleaned_data['selection'])))
+
                 memberships_form = memberships_form_model(lab)
         else:
             memberships_form = memberships_form_model(lab)
@@ -185,10 +190,12 @@ def invitation_response(request, invitation_id, response):
         invitation.accept()
         messages.success(request, "You are now a member of {0}!".format(invitation.lab))
         return redirect(reverse('labs_lab', kwargs={'lab_id': invitation.lab.id}))
+
     elif response == 'decline':
         invitation.delete()
         messages.info(request, "You have declined the invitation to {0}.".format(invitation.lab))
         return redirect(reverse('users_profile', kwargs={'username': request.user}))
+
     else:
         # URL regex should prevent us from ever getting here
         return Http404
