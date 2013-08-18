@@ -17,6 +17,7 @@ class ReservationTable(tables.Table):
     class Meta:
         model = Reservation
         fields = ('id', 'start_time', 'time_until', 'lab', 'get_pods', 'duration', 'created_time')
+        empty_text = "Nothing scheduled"
         attrs = {
             'class': 'table table-striped',
         }

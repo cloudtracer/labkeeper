@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from labs.forms import ConsoleServerForm
 from labs.models import *
 
 
@@ -30,6 +31,7 @@ class ConsoleServerPortAdmin(admin.ModelAdmin):
 
 
 class ConsoleServerAdmin(admin.ModelAdmin):
+    form = ConsoleServerForm
     list_display = ('name', 'lab', 'fqdn', 'ip4_address')
     inlines = [
         ConsoleServerPortInline,
