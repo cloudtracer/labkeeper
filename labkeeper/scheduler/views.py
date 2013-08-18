@@ -26,7 +26,7 @@ def delete_reservation(request, rsv_id):
     rsv.delete()
     messages.info(request, "Your reservation has been deleted.")
 
-    return redirect(reverse('my_reservations'))
+    return redirect(reverse('scheduler_reservation_list'))
 
 
 def reservation_list(request, username=None):

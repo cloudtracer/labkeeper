@@ -4,8 +4,8 @@ urlpatterns = patterns('users',
     #url(r'^$', 'views.default', name='users'),
 
     # Login/logout
-    url(r'^login/$', 'views.login', name='login'),
-    url(r'^logout/$', 'views.logout', name='logout'),
+    url(r'^login/$', 'views.login', name='users_login'),
+    url(r'^logout/$', 'views.logout', name='users_logout'),
 
     # User profiles
     url(r'^(?P<username>\w+)/$', 'views.profile', name='users_profile'),

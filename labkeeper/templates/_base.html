@@ -10,8 +10,8 @@
 <p></p>
 <div class="container">
   <p class="text-right">
-    {% if request.user.is_authenticated %}Logged in as <a href="{{ request.user.profile.get_absolute_url }}"><strong>{{ request.user }}</strong></a> | <a href="{% url 'logout' %}">Log out</a>
-    {% else %}<a href="{% url 'login' %}">Log in</a>
+    {% if request.user.is_authenticated %}Logged in as <a href="{{ request.user.profile.get_absolute_url }}"><strong>{{ request.user }}</strong></a> | <a href="{% url 'users_logout' %}">Log out</a>
+    {% else %}<a href="{% url 'users_login' %}">Log in</a>
     {% endif %}
   </p>
   <div class="navbar">
@@ -21,7 +21,7 @@
         <ul class="nav">
           <li><a href="{% url 'home' %}">Home</a></li>
           <li><a href="{% url 'labs' %}">Labs</a></li>
-          {% if user.is_authenticated %}<li><a href="{% url 'my_reservations' %}">Reservations</a></li>{% endif %}
+          {% if user.is_authenticated %}<li><a href="{% url 'scheduler_reservation_list' %}">Reservations</a></li>{% endif %}
         </ul>
         {% if user.is_superuser %}<ul class="nav pull-right"><li class="divider-vertical"></li><li><a href="/admin/">Admin</a></li>{% endif %}
       </div>

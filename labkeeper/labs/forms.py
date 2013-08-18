@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from labs.models import ConsoleServer, ConsoleServerPort, Lab, Topology, Membership, MembershipInvitation, Pod
+from labs.models import *
 
 
 class LabForm(forms.ModelForm):
@@ -13,6 +13,14 @@ class LabForm(forms.ModelForm):
                   'max_rsv_per_user', 'min_reservation', 'max_reservation',
                   'opening_time', 'closing_time',
                   'photo', 'profile']
+
+    def __init__(self, *args, **kwargs):
+        super(LabForm, self).__init__(*args, **kwargs)
+
+        # Only allow Lab to be activated if...
+        if not self.instance.pods.count() or not self.instance.consoleservers.count() or not Device.objects.filter(pod__in=self.instance.pods.all()).count():
+            self.fields['is_active'].widget.attrs['disabled'] = True
+            self.fields['is_active'].help_text = "This lab must have at least one console server, pod, and device to be activated."
 
 
 class NewLabForm(forms.ModelForm):
@@ -121,6 +129,16 @@ class MembershipManagementForm(forms.Form):
             queryset = Membership.objects.filter(lab=self.lab),
             widget = forms.CheckboxSelectMultiple,
             )
+
+
+class OwnerMembershipManagementForm(MembershipManagementForm):
+
+    action = forms.ChoiceField(choices=(
+        ('remove', 'Remove'),
+        ('promote_admin', 'Promote to admin'),
+        ('promote_owner', 'Promote to owner'),
+        ('demote', 'Demote'),
+    ))
 
 
 class MembershipInvitationForm(forms.Form):

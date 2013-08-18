@@ -6,7 +6,7 @@ import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    url(r'^$', 'labkeeper.views.default', name='home'),
+    url(r'^$', 'labkeeper.views.home', name='home'),
 
     # Native apps
     url(r'^labs/', include('labs.urls')),

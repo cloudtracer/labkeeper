@@ -5,7 +5,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 
 from users.forms import UserProfileForm
@@ -13,6 +13,7 @@ from users.forms import UserProfileForm
 
 def login(request):
 
+    redirect_to = request.GET.get('next')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -22,13 +23,17 @@ def login(request):
             request.session['django_timezone'] = pytz.timezone(form.get_user().profile.timezone)
 
             messages.success(request, "Welcome {0}! You are logged in.".format(request.user))
-            return redirect(reverse('home'))
+            if not redirect_to.strip() or '//' in redirect_to:
+                return redirect(reverse('home'))
+            else:
+                return HttpResponseRedirect(redirect_to)
     else:
         form = AuthenticationForm(request)
         request.session.set_test_cookie()
 
     return render(request, 'users/login.html', {
         'form': form,
+        'next': redirect_to,
         })
 
 
@@ -37,7 +42,7 @@ def logout(request):
     auth_logout(request)
 
     messages.info(request, "You have logged out.")
-    return redirect(reverse('login'))
+    return redirect(reverse('users_login'))
 
 
 def profile(request, username):

@@ -155,6 +155,7 @@ INSTALLED_APPS = (
 # django-registration
 REGISTRATION_OPEN = True
 ACCOUNT_ACTIVATION_DAYS = 7
+LOGIN_URL = '/users/login/'
 
 # sorl.thumbnail
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'

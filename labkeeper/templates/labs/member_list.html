@@ -24,7 +24,7 @@
     {% if request.user in lab.admins and not lab.is_public %}
     <form class="form-inline well" action="." method="post">
     <h4>Add some friends!</h4>
-    <p>As an administrator of a private lab, you can other registered users to join your lab by entering their username below.</p>
+    <p>As an administrator of a private lab, you can invite other registered users to join your lab by entering their username below.</p>
     <div class="control-group{% if invitation_form.member.errors %} error{% endif %}">
       {% csrf_token %}
       {% render_field invitation_form.member class+="input-medium" %}

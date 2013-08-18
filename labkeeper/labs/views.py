@@ -112,17 +112,32 @@ def member_list(request, lab_id):
     # Admin view
     if request.user in lab.admins:
 
+        # Owners can promote/demote members to new roles. Admins can only remove members.
+        if request.user in lab.owners:
+            memberships_form_model = OwnerMembershipManagementForm
+        else:
+            memberships_form_model = MembershipManagementForm
+
         # Membership management
         if request.POST.get('membership_management'):
-            memberships_form = MembershipManagementForm(lab, request.POST)
+            memberships_form = memberships_form_model(lab, request.POST)
             if memberships_form.is_valid():
                 if memberships_form.cleaned_data['action'] == 'remove':
                     for m in memberships_form.cleaned_data['selection']:
                         m.delete()
-                    messages.info(request, "Removed {0} memberships".format(len(memberships_form.cleaned_data['selection'])))
-                memberships_form = MembershipManagementForm(lab)
+                    messages.info(request, "Removed {0} members".format(len(memberships_form.cleaned_data['selection'])))
+                elif memberships_form.cleaned_data['action'] == 'promote_admin':
+                    memberships_form.cleaned_data['selection'].update(role=Membership.ADMIN)
+                    messages.info(request, "Promoted {0} members to admin role".format(len(memberships_form.cleaned_data['selection'])))
+                elif memberships_form.cleaned_data['action'] == 'promote_owner':
+                    memberships_form.cleaned_data['selection'].update(role=Membership.OWNER)
+                    messages.info(request, "Promoted {0} members to owner role".format(len(memberships_form.cleaned_data['selection'])))
+                elif memberships_form.cleaned_data['action'] == 'demote':
+                    memberships_form.cleaned_data['selection'].update(role=Membership.MEMBER)
+                    messages.info(request, "Demoted {0} members to regular members".format(len(memberships_form.cleaned_data['selection'])))
+                memberships_form = memberships_form_model(lab)
         else:
-            memberships_form = MembershipManagementForm(lab)
+            memberships_form = memberships_form_model(lab)
 
         # Sending an invitation
         if request.POST.get('send_invitation'):
@@ -159,6 +174,7 @@ def member_list(request, lab_id):
         })
 
 
+@login_required
 def invitation_response(request, invitation_id, response):
 
     invitation = get_object_or_404(MembershipInvitation, id=invitation_id)
