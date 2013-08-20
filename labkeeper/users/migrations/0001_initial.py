@@ -12,6 +12,14 @@ class Migration(SchemaMigration):
         db.create_table(u'users_userprofile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='profile', unique=True, to=orm['auth.User'])),
+            ('last_active', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('birth_date', self.gf('django.db.models.fields.DateField')(null=True, blank=True)),
+            ('gender', self.gf('django.db.models.fields.PositiveSmallIntegerField')(null=True, blank=True)),
+            ('country', self.gf('django_countries.fields.CountryField')(max_length=2, blank=True)),
+            ('timezone', self.gf('django.db.models.fields.CharField')(default='UTC', max_length=40)),
+            ('location', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
+            ('twitter', self.gf('django.db.models.fields.CharField')(max_length=15, blank=True)),
+            ('facebook', self.gf('django.db.models.fields.CharField')(max_length=50, blank=True)),
         ))
         db.send_create_signal(u'users', ['UserProfile'])
 
@@ -60,7 +68,15 @@ class Migration(SchemaMigration):
         },
         u'users.userprofile': {
             'Meta': {'object_name': 'UserProfile'},
+            'birth_date': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'country': ('django_countries.fields.CountryField', [], {'max_length': '2', 'blank': 'True'}),
+            'facebook': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            'gender': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_active': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            'timezone': ('django.db.models.fields.CharField', [], {'default': "'UTC'", 'max_length': '40'}),
+            'twitter': ('django.db.models.fields.CharField', [], {'max_length': '15', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'profile'", 'unique': 'True', 'to': u"orm['auth.User']"})
         }
     }

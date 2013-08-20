@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.create_table(u'scheduler_reservation', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['auth.User'])),
-            ('pod', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['labs.Pod'])),
+            ('lab', self.gf('django.db.models.fields.related.ForeignKey')(related_name='reservations', to=orm['labs.Lab'])),
             ('created_time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
             ('created_ip_address', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, null=True, blank=True)),
             ('start_time', self.gf('django.db.models.fields.DateTimeField')()),
@@ -22,10 +22,22 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'scheduler', ['Reservation'])
 
+        # Adding M2M table for field pods on 'Reservation'
+        m2m_table_name = db.shorten_name(u'scheduler_reservation_pods')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('reservation', models.ForeignKey(orm[u'scheduler.reservation'], null=False)),
+            ('pod', models.ForeignKey(orm[u'labs.pod'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['reservation_id', 'pod_id'])
+
 
     def backwards(self, orm):
         # Deleting model 'Reservation'
         db.delete_table(u'scheduler_reservation')
+
+        # Removing M2M table for field pods on 'Reservation'
+        db.delete_table(db.shorten_name(u'scheduler_reservation_pods'))
 
 
     models = {
@@ -67,25 +79,41 @@ class Migration(SchemaMigration):
         },
         u'labs.lab': {
             'Meta': {'object_name': 'Lab'},
+            'allow_multipod': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'closing_time': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'country': ('django_countries.fields.CountryField', [], {'max_length': '2'}),
+            'founded': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'})
+            'last_edited': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'last_edited_by': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '80', 'blank': 'True'}),
+            'max_reservation': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '6'}),
+            'max_rsv_per_user': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '1'}),
+            'min_reservation': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '2'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
+            'opening_time': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'photo': ('sorl.thumbnail.fields.ImageField', [], {'max_length': '100', 'blank': 'True'}),
+            'profile': ('django_bleach.models.BleachField', [], {})
         },
         u'labs.pod': {
-            'Meta': {'unique_together': "(('lab', 'name'),)", 'object_name': 'Pod'},
+            'Meta': {'ordering': "['name']", 'unique_together': "(('lab', 'name'),)", 'object_name': 'Pod'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'pods'", 'to': u"orm['labs.Lab']"}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "'Default'", 'max_length': '80'})
+            'name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '30'}),
+            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '30'})
         },
         u'scheduler.reservation': {
-            'Meta': {'object_name': 'Reservation'},
+            'Meta': {'ordering': "['start_time']", 'object_name': 'Reservation'},
             'created_ip_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'null': 'True', 'blank': 'True'}),
             'created_time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'duration': ('django.db.models.fields.PositiveSmallIntegerField', [], {}),
             'end_time': ('django.db.models.fields.DateTimeField', [], {'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['labs.Lab']"}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '16'}),
-            'pod': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['labs.Pod']"}),
+            'pods': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'reservations'", 'symmetrical': 'False', 'to': u"orm['labs.Pod']"}),
             'start_time': ('django.db.models.fields.DateTimeField', [], {}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'reservations'", 'to': u"orm['auth.User']"})
         }

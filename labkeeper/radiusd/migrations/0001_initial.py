@@ -12,7 +12,7 @@ class Migration(SchemaMigration):
         db.create_table(u'radiusd_radiuslogin', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('time', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('consoleserverport', self.gf('django.db.models.fields.related.ForeignKey')(related_name='radius_logins', to=orm['labs.ConsoleServerPort'])),
+            ('device', self.gf('django.db.models.fields.related.ForeignKey')(related_name='radius_logins', to=orm['labs.Device'])),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='radius_logins', to=orm['auth.User'])),
             ('user_ip', self.gf('django.db.models.fields.GenericIPAddressField')(max_length=39, blank=True)),
         ))
@@ -62,26 +62,25 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'labs.consoleserver': {
-            'Meta': {'unique_together': "(('lab', 'name'), ('lab', 'fqdn'), ('lab', 'ip4_address'))", 'object_name': 'ConsoleServer'},
-            'devices': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['labs.Device']", 'through': u"orm['labs.ConsoleServerPort']", 'symmetrical': 'False'}),
-            'fqdn': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '50', 'blank': 'True'}),
+            'Meta': {'unique_together': "(('lab', 'ip4_address'),)", 'object_name': 'ConsoleServer'},
+            'fqdn': ('django.db.models.fields.CharField', [], {'max_length': '50', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'ip4_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39'}),
+            'ip4_address': ('django.db.models.fields.GenericIPAddressField', [], {'max_length': '39', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'consoleservers'", 'to': u"orm['labs.Lab']"}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
             'secret': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '30'})
         },
         u'labs.consoleserverport': {
-            'Meta': {'unique_together': "(('consoleserver', 'number'),)", 'object_name': 'ConsoleServerPort'},
+            'Meta': {'unique_together': "(('consoleserver', 'number'), ('consoleserver', 'telnet_port'), ('consoleserver', 'ssh_port'))", 'object_name': 'ConsoleServerPort'},
             'consoleserver': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ports'", 'to': u"orm['labs.ConsoleServer']"}),
-            'device': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'port'", 'unique': 'True', 'to': u"orm['labs.Device']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'number': ('django.db.models.fields.PositiveIntegerField', [], {}),
-            'ssh_port': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True'}),
-            'telnet_port': ('django.db.models.fields.PositiveIntegerField', [], {'blank': 'True'})
+            'ssh_port': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'telnet_port': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         u'labs.device': {
-            'Meta': {'unique_together': "(('pod', 'name'), ('pod', 'slug'))", 'object_name': 'Device'},
+            'Meta': {'ordering': "['name']", 'unique_together': "(('pod', 'name'), ('pod', 'slug'))", 'object_name': 'Device'},
+            'cs_port': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'device'", 'unique': 'True', 'to': u"orm['labs.ConsoleServerPort']"}),
             'description': ('django.db.models.fields.CharField', [], {'max_length': '80', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
@@ -91,20 +90,34 @@ class Migration(SchemaMigration):
         },
         u'labs.lab': {
             'Meta': {'object_name': 'Lab'},
+            'allow_multipod': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'closing_time': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'country': ('django_countries.fields.CountryField', [], {'max_length': '2'}),
+            'founded': ('django.db.models.fields.DateField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'})
+            'last_edited': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'last_edited_by': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True'}),
+            'location': ('django.db.models.fields.CharField', [], {'max_length': '80', 'blank': 'True'}),
+            'max_reservation': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '6'}),
+            'max_rsv_per_user': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '1'}),
+            'min_reservation': ('django.db.models.fields.PositiveSmallIntegerField', [], {'default': '2'}),
+            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
+            'opening_time': ('django.db.models.fields.PositiveSmallIntegerField', [], {'null': 'True', 'blank': 'True'}),
+            'photo': ('sorl.thumbnail.fields.ImageField', [], {'max_length': '100', 'blank': 'True'}),
+            'profile': ('django_bleach.models.BleachField', [], {})
         },
         u'labs.pod': {
-            'Meta': {'unique_together': "(('lab', 'name'),)", 'object_name': 'Pod'},
+            'Meta': {'ordering': "['name']", 'unique_together': "(('lab', 'name'),)", 'object_name': 'Pod'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lab': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'pods'", 'to': u"orm['labs.Lab']"}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "'Default'", 'max_length': '30'}),
+            'name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '30'}),
             'slug': ('django.db.models.fields.SlugField', [], {'max_length': '30'})
         },
         u'radiusd.radiuslogin': {
             'Meta': {'object_name': 'RadiusLogin'},
-            'consoleserverport': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'radius_logins'", 'to': u"orm['labs.ConsoleServerPort']"}),
+            'device': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'radius_logins'", 'to': u"orm['labs.Device']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'time': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'radius_logins'", 'to': u"orm['auth.User']"}),
