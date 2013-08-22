@@ -13,7 +13,7 @@ from users.forms import UserProfileForm
 
 def login(request):
 
-    redirect_to = request.GET.get('next')
+    redirect_to = request.GET.get('next', '')
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
