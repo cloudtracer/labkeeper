@@ -383,12 +383,12 @@ def manage_consoleservers(request, lab_id):
             # If directed, create n initial ConsoleServerPorts
             if form.cleaned_data['port_count']:
                 for i in range(int(form.cleaned_data['port_count'])):
-                    ConsoleServerPort.objects.create(
-                        consoleserver = new_consoleserver,
-                        number = form.cleaned_data['base_port_number'] + i,
-                        telnet_port = form.cleaned_data['base_telnet_port'] + i,
-                        ssh_port = form.cleaned_data['base_ssh_port'] + i
-                    )
+                    new_csp = ConsoleServerPort(consoleserver=new_consoleserver, number=form.cleaned_data['base_port_number']+i)
+                    if form.cleaned_data['base_telnet_port']:
+                        new_csp.telnet_port = form.cleaned_data['base_telnet_port'] + i
+                    if form.cleaned_data['base_ssh_port']:
+                        new_csp.ssh_port = form.cleaned_data['base_ssh_port'] + i
+                    new_csp.save()
                 messages.success(request, "Created {0} console server ports".format(i + 1))
             return redirect(reverse('labs_edit_consoleserver', kwargs={'cs_id': new_consoleserver.id}))
     else:
