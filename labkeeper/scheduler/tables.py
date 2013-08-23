@@ -10,7 +10,7 @@ class ReservationTable(tables.Table):
 
     id = tables.LinkColumn('scheduler_reservation', args=[A('pk')])
     start_time = tables.DateTimeColumn()
-    lab = tables.LinkColumn('labs_lab', args=[A('pk')])
+    lab = tables.LinkColumn('labs_lab', args=[A('lab.id')])
     get_pods = tables.TemplateColumn('{{ value|join:", "}}', verbose_name='Pods')
     duration = tables.TemplateColumn('{{ value }} hour{{ value|pluralize }}', verbose_name='Duration')
 
