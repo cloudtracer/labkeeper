@@ -9,8 +9,8 @@ class UserProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=False)
     last_name = forms.CharField(max_length=30, required=False)
     email = forms.EmailField(label='Email address')
-    password1 = forms.CharField(required=False, widget=forms.PasswordInput)
-    password2 = forms.CharField(required=False, widget=forms.PasswordInput)
+    password1 = forms.CharField(required=False, widget=forms.PasswordInput, label='Password')
+    password2 = forms.CharField(required=False, widget=forms.PasswordInput, label='Password (confirm)')
 
     class Meta:
         model = UserProfile
