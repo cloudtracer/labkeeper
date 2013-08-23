@@ -139,7 +139,6 @@ INSTALLED_APPS = (
 
     # Forms stuff
     'django_forms_bootstrap',
-    'widget_tweaks',
 
     # User-generated content
     'django_bleach',

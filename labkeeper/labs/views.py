@@ -465,7 +465,7 @@ def manage_devices(request, lab_id):
         return HttpResponseForbidden()
 
     # TODO: This formset generates excessive SQL queries; any way to optimize it?
-    DeviceFormSet = modelformset_factory(Device, can_delete=True, extra=3)
+    DeviceFormSet = modelformset_factory(Device, form=DeviceForm, can_delete=True, extra=3)
     if request.method == 'POST':
         formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
         for form in formset:

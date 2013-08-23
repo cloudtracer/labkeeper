@@ -100,6 +100,12 @@ class NewConsoleServerForm(ConsoleServerForm):
 
 class ConsoleServerPortForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super(ConsoleServerPortForm, self).__init__(*args, **kwargs)
+        self.fields['number'].widget.attrs['class'] = 'input-small'
+        self.fields['telnet_port'].widget.attrs['class'] = 'input-small'
+        self.fields['ssh_port'].widget.attrs['class'] = 'input-small'
+
     class Meta:
         model = ConsoleServerPort
         fields = ['number', 'telnet_port', 'ssh_port']
@@ -113,6 +119,21 @@ class ConsoleServerPortForm(forms.ModelForm):
             self._errors['ssh_port'] = self.error_class([msg])
 
         return cleaned_data
+
+
+class DeviceForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(DeviceForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs['class'] = 'input-block-level'
+        self.fields['pod'].widget.attrs['class'] = 'input-block-level'
+        self.fields['cs_port'].widget.attrs['class'] = 'input-block-level'
+        self.fields['type'].widget.attrs['class'] = 'input-block-level'
+        self.fields['description'].widget.attrs['class'] = 'input-block-level'
+
+    class Meta:
+        model = Device
+        fields = ['name', 'pod', 'cs_port', 'type', 'description']
 
 
 class MembershipManagementForm(forms.Form):
@@ -149,7 +170,7 @@ class MembershipInvitationForm(forms.Form):
         super(MembershipInvitationForm, self).__init__(*args, **kwargs)
         self.lab = lab
 
-        # Error messages
+        self.fields['member'].widget.attrs['class'] = 'input-medium'
         self.fields['member'].error_messages['required'] = "Please specify a valid username."
 
     def clean_member(self):

@@ -1,5 +1,4 @@
 {% extends '_base.html' %}
-{% load widget_tweaks %}
 {% load render_table from django_tables2 %}
 
 {% block content %}
@@ -12,7 +11,7 @@
       {% csrf_token %}
     {% render_table table %}
     <div class="form-actions form-inline">
-      {% render_field memberships_form.action %}
+      {{ memberships_form.action }}
       <input type="submit" name="membership_management" value="Go" class="btn btn-primary" />
     </div>
     </form>
@@ -27,7 +26,7 @@
     <p>As an administrator of a private lab, you can invite other registered users to join your lab by entering their username below.</p>
     <div class="control-group{% if invitation_form.member.errors %} error{% endif %}">
       {% csrf_token %}
-      {% render_field invitation_form.member class+="input-medium" %}
+      {{ invitation_form.member }}
       <input type="submit" name="send_invitation" value="Invite User" class="btn btn-primary" />
       {% for error in invitation_form.member.errors %}
         <span class="help-inline">{{ error }}</span>
