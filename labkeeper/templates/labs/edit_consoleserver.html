@@ -18,32 +18,46 @@
       <fieldset>
         <legend>Console Server Ports</legend>
         {% csrf_token %}
+        <div class="row-fluid">
+          <div class="span7">
+            <div class="row-fluid">
+              <div class="span3"><label>Port ID</label></div>
+              <div class="span3"><label>Telnet Port</label></div>
+              <div class="span3"><label>SSH Port</label></div>
+              <div class="span3"><label>Delete?</label></div>
+            </div>
+            {% for form in port_formset %}
+            {{ form.id }}
+            <div class="row-fluid control-group{% if form.errors %} error{% endif %}">
+              <div class="span3">
+                {{ form.number }}
+                {% if form.number.errors %}<span class="help-inline">{{ form.number.errors.0 }}</span>{% endif %}
+              </div>
+              <div class="span3">
+                {{ form.telnet_port }}
+                {% if form.telnet_port.errors %}<span class="help-inline">{{ form.telnet_port.errors.0 }}</span>{% endif %}
+              </div>
+              <div class="span3">
+                {{ form.ssh_port }}
+                {% if form.ssh_port.errors %}<span class="help-inline">{{ form.ssh_port.errors.0 }}</span>{% endif %}
+              </div>
+              <div class="span3">
+                {% if port_formset.can_delete and form.initial %}{{ form.DELETE }}{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
           <div class="row-fluid">
-            <div class="span2"><label>Number</label></div>
-            <div class="span2"><label>Telnet Port</label></div>
-            <div class="span2"><label>SSH Port</label></div>
-            <div class="span1"><label>Delete?</label></div>
-          </div>
-        {% for form in port_formset %}
-          {{ form.id }}
-          <div class="row-fluid control-group{% if form.errors %} error{% endif %}">
-            <div class="span2">
-              {{ form.number }}
-              {% if form.number.errors %}<span class="help-inline">{{ form.number.errors.0 }}</span>{% endif %}
-            </div>
-            <div class="span2">
-              {{ form.telnet_port }}
-              {% if form.telnet_port.errors %}<span class="help-inline">{{ form.telnet_port.errors.0 }}</span>{% endif %}
-            </div>
-            <div class="span2">
-              {{ form.ssh_port }}
-              {% if form.ssh_port.errors %}<span class="help-inline">{{ form.ssh_port.errors.0 }}</span>{% endif %}
-            </div>
-            <div class="span1">
-              {% if port_formset.can_delete and form.initial %}{{ form.DELETE }}{% endif %}
+            <div class="span5 well">
+              <dl>
+                <dt>Port ID</dt>
+                <dl>The number of the physical port within the console server, as indicated by the NAS-Port attribute in RADIUS authentication requests. This will likely differ from the Telnet or SSH port.</dl>
+                <dt>Telnet and SSH Ports</dt>
+                <dl>The TCP port used for Telnet and SSH connections. You must specify at least one and optionally both.</dl>
+              </dl>
             </div>
           </div>
-        {% endfor %}
+        </div>
       </fieldset>
       <div class="form-actions">
         <a href="{% url 'labs_manage_consoleservers' cs.lab_id %}" class="btn">Go back</a>

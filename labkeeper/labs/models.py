@@ -163,7 +163,7 @@ class ConsoleServerPort(models.Model):
     """
 
     consoleserver = models.ForeignKey(ConsoleServer, related_name='ports')
-    number = models.PositiveIntegerField('Port number')
+    number = models.PositiveIntegerField('Port ID')
     telnet_port = models.PositiveIntegerField('Telnet port', blank=True, null=True)
     ssh_port = models.PositiveIntegerField('SSH port', blank=True, null=True)
 

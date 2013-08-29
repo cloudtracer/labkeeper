@@ -30,8 +30,20 @@
     <form class="form-horizontal" action="." method="post">
       <fieldset>
         <legend>Add a Console Server</legend>
-        {% csrf_token %}
-        {{ form|as_bootstrap }}
+        <div class="row-fluid">
+          <div class="span7">
+            {% csrf_token %}
+            {{ form|as_bootstrap }}
+          </div>
+          <div class="span5 well">
+            <dl>
+              <dt>Domain Name and IP Addresses</dt>
+              <dl>If your console server does not have a static public IP address, you can identify it by its domain name instead. Users will need to include your domain when logging in (e.g. username@example.com), which identifies your console server.</dl>
+              <dt>Creating Initial Ports</dt>
+              <dl>You may optionally create a set of initial ports along with your console server. Simply specify the ID and Telnet/SSH ports for the first port, and the number of ports to create.</dl>
+            </dl>
+          </div>
+        </div>
       </fieldset>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Create</button>

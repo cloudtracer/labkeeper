@@ -79,17 +79,23 @@ class NewConsoleServerForm(ConsoleServerForm):
     )
 
     port_count = forms.ChoiceField(choices=PORT_COUNT_CHOICES, required=False)
-    base_port_number = forms.IntegerField(min_value=0, help_text="The number of the first port", required=False)
-    base_telnet_port = forms.IntegerField(min_value=0, help_text="The Telnet port number of the first port", required=False)
-    base_ssh_port = forms.IntegerField(min_value=0, help_text="The SSH port number of the first port", required=False)
+    base_port_id = forms.IntegerField(min_value=0, required=False, label='Base port ID', help_text="The ID of the first port")
+    base_telnet_port = forms.IntegerField(min_value=0, required=False, label='Base Telnet port', help_text="The Telnet port number of the first port")
+    base_ssh_port = forms.IntegerField(min_value=0, required=False, label='Base SSH port', help_text="The SSH port number of the first port")
+
+    def __init__(self, *args, **kwargs):
+        super(NewConsoleServerForm, self).__init__(*args, **kwargs)
+        self.fields['base_port_id'].widget.attrs['class'] = 'input-small'
+        self.fields['base_telnet_port'].widget.attrs['class'] = 'input-small'
+        self.fields['base_ssh_port'].widget.attrs['class'] = 'input-small'
 
     def clean(self):
         cleaned_data = super(NewConsoleServerForm, self).clean()
 
         # If initial port count is nonzero, base port number must be set
         if int(cleaned_data.get('port_count')):
-            if not cleaned_data.get('base_port_number'):
-                self._errors['base_port_number'] = self.error_class(['Must specify a base port number'])
+            if not cleaned_data.get('base_port_id'):
+                self._errors['base_port_id'] = self.error_class(['Must specify a base port ID'])
             if not cleaned_data.get('base_telnet_port') and not cleaned_data.get('base_ssh_port'):
                 msg = 'Must specify a base Telnet and/or SSH port'
                 self._errors['base_telnet_port'] = self.error_class([msg])
