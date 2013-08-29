@@ -44,7 +44,9 @@ def schedule(request, lab_id):
     schedule = Schedule(lab, tz=request.session.get('django_timezone'))
 
     # Determine if the current User is allowed to make a Reservation
-    if not lab.pods.count():
+    if not request.user.is_authenticated():
+        reservation_forbidden = "You must log in in order to reserve lab time."
+    elif not lab.pods.count():
         reservation_forbidden = "This lab does not have any pods defined yet."
     elif request.user in lab.admins:
         reservation_forbidden = False
