@@ -1,5 +1,7 @@
 {% extends '_base.html' %}
 
+{% block title %}{{ block.super }} - {{ profile.user }}{% endblock %}
+
 {% block content %}
 <h2>{{ profile.user }}{% ifequal profile.user request.user %} <small><a href="{% url 'users_edit_profile' profile.user.username %}">edit</a></small>{% endifequal %}</h2>
 <div class="row">

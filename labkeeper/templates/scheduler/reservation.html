@@ -1,6 +1,8 @@
 {% extends '_base.html' %}
 {% load tz %}
 
+{% block title %}Reservation #{{ rsv.id }} - {{ rsv.lab }}{% endblock %}
+
 {% block content %}
 <div class="row">
   <div class="span6">
