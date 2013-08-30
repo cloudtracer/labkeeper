@@ -6,8 +6,9 @@
   <div class="row-fluid">
     <div class="span2">
       <ul class="nav nav-pills nav-stacked">
-        <li{% ifequal nav_labs_manage 'profile' %} class="active"{% endifequal %}><a href="{% url 'labs_edit_lab' lab.id %}">Lab Profile</a></li>
-        <li{% ifequal nav_labs_manage 'topologies' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_topologies' lab.id %}">Lab Topologies</a></li>
+        <li{% ifequal nav_labs_manage 'profile' %} class="active"{% endifequal %}><a href="{% url 'labs_edit_lab_profile' lab.id %}">Lab Profile</a></li>
+        <li{% ifequal nav_labs_manage 'settings' %} class="active"{% endifequal %}><a href="{% url 'labs_edit_lab_settings' lab.id %}">Lab Settings</a></li>
+        <li{% ifequal nav_labs_manage 'topologies' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_topologies' lab.id %}">Topologies</a></li>
         <li{% ifequal nav_labs_manage 'pods' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_pods' lab.id %}">Pods</a></li>
         <li{% ifequal nav_labs_manage 'consoleservers' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_consoleservers' lab.id %}">Console Servers</a></li>
         <li{% ifequal nav_labs_manage 'devices' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_devices' lab.id %}">Devices</a></li>

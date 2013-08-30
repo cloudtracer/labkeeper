@@ -3,5 +3,5 @@
   <li{% ifequal nav_labs "dashboard" %} class="active"{% endifequal %}><a href="{% url 'labs_lab' lab.id %}">Dashboard</a></li>
   <li{% ifequal nav_labs "schedule" %} class="active"{% endifequal %}><a href="{% url 'labs_schedule' lab.id %}">Schedule</a></li>
   <li{% ifequal nav_labs "members" %} class="active"{% endifequal %}><a href="{% url 'labs_member_list' lab.id %}">Members</a></li>
-  {% if user in lab.admins %}<li{% ifequal nav_labs "manage" %} class="active"{% endifequal %}><a href="{% url 'labs_edit_lab' lab.id %}">Manage</a></li>{% endif %}
+  {% if user in lab.admins %}<li{% ifequal nav_labs "manage" %} class="active"{% endifequal %}><a href="{% url 'labs_edit_lab_profile' lab.id %}">Manage</a></li>{% endif %}
 </ul>

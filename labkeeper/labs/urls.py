@@ -13,7 +13,8 @@ urlpatterns = patterns('labs',
     url(r'^(?P<lab_id>\d+)/members/$', 'views.member_list', name='labs_member_list'),
 
     # Lab/device management
-    url(r'^(?P<lab_id>\d+)/edit/$', 'views.edit_lab', name='labs_edit_lab'),
+    url(r'^(?P<lab_id>\d+)/edit/$', 'views.edit_lab_profile', name='labs_edit_lab_profile'),
+    url(r'^(?P<lab_id>\d+)/settings/$', 'views.edit_lab_settings', name='labs_edit_lab_settings'),
     url(r'^(?P<lab_id>\d+)/manage/topologies/$', 'views.manage_topologies', name='labs_manage_topologies'),
     url(r'^(?P<lab_id>\d+)/manage/devices/$', 'views.manage_devices', name='labs_manage_devices'),
     url(r'^(?P<lab_id>\d+)/manage/pods/$', 'views.manage_pods', name='labs_manage_pods'),

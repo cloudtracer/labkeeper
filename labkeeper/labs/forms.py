@@ -4,18 +4,23 @@ from django.contrib.auth.models import User
 from labs.models import *
 
 
-class LabForm(forms.ModelForm):
+class LabProfileForm(forms.ModelForm):
 
     class Meta:
         model = Lab
-        fields = ['name', 'country', 'location',
-                  'is_public', 'is_active', 'allow_multipod',
+        fields = ['name', 'country', 'location', 'photo', 'profile']
+
+
+class LabSettingsForm(forms.ModelForm):
+
+    class Meta:
+        model = Lab
+        fields = ['is_public', 'is_active', 'allow_multipod',
                   'max_rsv_per_user', 'min_reservation', 'max_reservation',
-                  'opening_time', 'closing_time',
-                  'photo', 'profile']
+                  'opening_time', 'closing_time']
 
     def __init__(self, *args, **kwargs):
-        super(LabForm, self).__init__(*args, **kwargs)
+        super(LabSettingsForm, self).__init__(*args, **kwargs)
 
         # Only allow Lab to be activated if...
         if not self.instance.pods.count() or not self.instance.consoleservers.count() or not Device.objects.filter(pod__in=self.instance.pods.all()).count():

@@ -232,7 +232,7 @@ def create_lab(request):
 
 
 @login_required
-def edit_lab(request, lab_id):
+def edit_lab_profile(request, lab_id):
 
     lab = get_object_or_404(Lab, id=lab_id)
     if request.user not in lab.owners:
@@ -240,21 +240,46 @@ def edit_lab(request, lab_id):
 
     # Processing a submitted form
     if request.method == 'POST':
-        form = LabForm(request.POST, request.FILES, instance=lab)
+        form = LabProfileForm(request.POST, request.FILES, instance=lab)
         if form.is_valid():
             l = form.save()
             l.last_edited_by = request.user
             l.save()
             messages.success(request, "Your changes have been saved.")
-            return redirect(reverse('labs_edit_lab', kwargs={'lab_id': lab.id}))
+            return redirect(reverse('labs_edit_lab_profile', kwargs={'lab_id': lab.id}))
     else:
-        form = LabForm(instance=lab)
+        form = LabProfileForm(instance=lab)
 
-    return render(request, 'labs/edit_lab.html', {
+    return render(request, 'labs/edit_lab_profile.html', {
         'lab': lab,
         'form': form,
         'nav_labs': 'manage',
         'nav_labs_manage': 'profile',
+        })
+
+
+@login_required
+def edit_lab_settings(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+    if request.user not in lab.owners:
+        return HttpResponseForbidden()
+
+    # Processing a submitted form
+    if request.method == 'POST':
+        form = LabSettingsForm(request.POST, instance=lab)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your changes have been saved.")
+            return redirect(reverse('labs_edit_lab_settings', kwargs={'lab_id': lab.id}))
+    else:
+        form = LabSettingsForm(instance=lab)
+
+    return render(request, 'labs/edit_lab_settings.html', {
+        'lab': lab,
+        'form': form,
+        'nav_labs': 'manage',
+        'nav_labs_manage': 'settings',
         })
 
 
