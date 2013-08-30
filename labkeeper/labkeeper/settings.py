@@ -135,10 +135,8 @@ INSTALLED_APPS = (
     'easy_maps',
     'django_tables2',
     'sorl.thumbnail',
+    'bootstrap_toolkit',
     'debug_toolbar',
-
-    # Forms stuff
-    'django_forms_bootstrap',
 
     # User-generated content
     'django_bleach',
