@@ -69,8 +69,8 @@ class Lab(models.Model):
 
     def _get_map_address(self):
         if self.location:
-            return "{0}, {1}".format(self.location, self.country)
-        return self.country.name
+            return "{0}, {1}".format(self.location, unicode(self.country))
+        return unicode(self.country.name)
     map_address = property(_get_map_address)
 
     # Return a list of tz-aware hours during which the Lab is available each day
