@@ -12,6 +12,7 @@
         <li{% ifequal nav_labs_manage 'pods' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_pods' lab.id %}">Pods</a></li>
         <li{% ifequal nav_labs_manage 'consoleservers' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_consoleservers' lab.id %}">Console Servers</a></li>
         <li{% ifequal nav_labs_manage 'devices' %} class="active"{% endifequal %}><a href="{% url 'labs_manage_devices' lab.id %}">Devices</a></li>
+        <li{% ifequal nav_labs_manage 'delete' %} class="active"{% endifequal %}><a href="{% url 'labs_delete_lab' lab.id %}">Delete Lab</a></li>
       </ul>
     </div>
     <div class="span10">

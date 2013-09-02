@@ -1,0 +1,39 @@
+{% extends 'labs/_manage.html' %}
+{% load bootstrap_toolkit %}
+
+{% block lab_manage %}
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>Delete this lab?</legend>
+        <p>Are you <strong>absolutely certain</strong> you want to delete this lab and all of its components?</p>
+        <ul>
+        {% for pod in lab.pods.all %}
+          <li>Pod {{ pod }}</li>
+          <ul>
+          {% for device in pod.devices.all %}
+            <li>{{ device }}</li>
+          {% empty %}
+            <li>No devices</li>
+          {% endfor %}
+          </ul>
+        {% empty %}
+          <li>No pods</li>
+        {% endfor %}
+          <li>Console servers</li>
+          <ul>
+          {% for cs in lab.consoleservers.all %}
+            <li>{{ cs }}</li>
+          {% empty %}
+            <li>None</li>
+          {% endfor %}
+          </ul>
+        </ul>
+        {% csrf_token %}
+        {{ form|as_bootstrap }}
+      </fieldset>
+      <div class="form-actions">
+        <a href="{{ lab.get_absolute_url }}" class="btn">Go back</a>
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </div>
+    </form>
+{% endblock %}

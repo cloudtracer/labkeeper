@@ -222,7 +222,7 @@ def create_lab(request):
             Membership.objects.create(user=request.user, lab=lab, role=Membership.OWNER)
 
             messages.success(request, "Your lab has been created!")
-            return redirect(reverse('labs_edit_lab', kwargs={'lab_id': lab.id}))
+            return redirect(reverse('labs_edit_lab_profile', kwargs={'lab_id': lab.id}))
     else:
         form = NewLabForm()
 
@@ -280,6 +280,32 @@ def edit_lab_settings(request, lab_id):
         'form': form,
         'nav_labs': 'manage',
         'nav_labs_manage': 'settings',
+        })
+
+
+@login_required
+def delete_lab(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+    if request.user not in lab.owners:
+        return HttpResponseForbidden()
+
+    # Processing a submitted form
+    if request.method == 'POST':
+        form = DeleteLabForm(request.POST)
+        if form.is_valid():
+
+            # Delete the Lab and all its subordinate objects
+            lab.delete()
+
+            messages.info(request, "Lab \"{0}\" has been deleted.".format(lab.name))
+            return redirect(reverse('labs'))
+    else:
+        form = DeleteLabForm()
+
+    return render(request, 'labs/delete_lab.html', {
+        'form': form,
+        'lab': lab,
         })
 
 

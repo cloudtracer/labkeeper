@@ -37,6 +37,14 @@ class NewLabForm(forms.ModelForm):
                   'opening_time', 'closing_time']
 
 
+class DeleteLabForm(forms.Form):
+
+    confirm = forms.BooleanField(label='Yes, permanently delete this lab')
+
+    class Meta:
+        pass
+
+
 class PodForm(forms.ModelForm):
 
     class Meta:
