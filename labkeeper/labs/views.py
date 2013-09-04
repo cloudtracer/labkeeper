@@ -517,12 +517,20 @@ def manage_devices(request, lab_id):
     if request.user not in lab.owners:
         return HttpResponseForbidden()
 
+    # Compile list of ConsoleServerPorts for this Lab
+    cs_port_choices = []
+    for cs in lab.consoleservers.all():
+        my_ports = []
+        for cs_port in cs.ports.all():
+            my_ports.append((cs_port.id, cs_port))
+        cs_port_choices.append((cs, my_ports))
+
     # TODO: This formset generates excessive SQL queries; any way to optimize it?
     DeviceFormSet = modelformset_factory(Device, form=DeviceForm, can_delete=True, extra=3)
     if request.method == 'POST':
         formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
         for form in formset:
-            form.fields['pod'].choices = Pod.objects.filter(lab=lab)
+            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
             form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
         if formset.is_valid():
             formset.save()
