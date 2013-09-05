@@ -28,7 +28,7 @@ class DeviceManagementTable(tables.Table):
 
 
 class MembershipTable(tables.Table):
-    user = tables.Column(verbose_name='Member')
+    user = tables.LinkColumn('users_profile', args=[A('user')])
     joined = tables.DateColumn(format="Y-m-d")
 
     class Meta:
@@ -38,12 +38,9 @@ class MembershipTable(tables.Table):
             'class': 'table table-striped',
         }
 
-    def render_user(self, value):
-        return mark_safe("<a href=\"{0}\">{1}</a>".format(value.get_absolute_url(), value))
-
 
 class MembershipManagementTable(MembershipTable):
     selection = tables.CheckBoxColumn(accessor="pk", orderable=False)
 
     class Meta(MembershipTable.Meta):
-        fields = ('selection', 'user', 'joined', 'role')
+        fields = ('selection',)

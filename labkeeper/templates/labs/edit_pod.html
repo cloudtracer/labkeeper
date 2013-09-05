@@ -4,7 +4,7 @@
 {% block lab_manage %}
     <form class="form-horizontal" action="." method="post">
       <fieldset>
-        <legend>{{ pod.name }}</legend>
+        <legend>Pod {{ pod.name }}</legend>
         {% csrf_token %}
         {{ pod_form|as_bootstrap }}
       </fieldset>
