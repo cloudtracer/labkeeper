@@ -517,33 +517,62 @@ def manage_devices(request, lab_id):
     if request.user not in lab.owners:
         return HttpResponseForbidden()
 
-    # Compile list of ConsoleServerPorts for this Lab
-    cs_port_choices = []
-    for cs in lab.consoleservers.all():
-        my_ports = []
-        for cs_port in cs.ports.all():
-            my_ports.append((cs_port.id, cs_port))
-        cs_port_choices.append((cs, my_ports))
-
-    # TODO: This formset generates excessive SQL queries; any way to optimize it?
-    DeviceFormSet = modelformset_factory(Device, form=DeviceForm, can_delete=True, extra=3)
     if request.method == 'POST':
-        formset = DeviceFormSet(request.POST, queryset=Device.objects.filter(pod__lab=lab))
-        for form in formset:
-            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
-            form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
-        if formset.is_valid():
-            formset.save()
-            return redirect(reverse('labs_manage_devices', kwargs={'lab_id': lab.id}))
+        form = DeviceForm(lab, request.POST)
+        if form.is_valid():
+            new_device = form.save(commit=False)
+            new_device.save()
+            form = PodForm()
+            messages.success(request, "Created new device {0}".format(new_device.name))
     else:
-        formset = DeviceFormSet(queryset=Device.objects.filter(pod__lab=lab))
-        for form in formset:
-            form.fields['pod'].queryset = Pod.objects.filter(lab=lab)
-            form.fields['cs_port'].queryset = ConsoleServerPort.objects.filter(consoleserver__lab=lab)
+        form = DeviceForm(lab)
+
+    # Compile the Device management table
+    table = DeviceManagementTable(Device.objects.filter(pod__lab=lab))
+    RequestConfig(request, paginate=False).configure(table)
 
     return render(request, 'labs/manage_devices.html', {
         'lab': lab,
-        'formset': formset,
+        'table': table,
+        'form': form,
         'nav_labs': 'manage',
         'nav_labs_manage': 'devices',
         })
+
+@login_required
+def edit_device(request, device_id):
+
+    device = get_object_or_404(Device, id=device_id)
+    lab = device.pod.lab
+    if request.user not in lab.owners:
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = DeviceForm(lab, request.POST, instance=device)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your changes to {0} have been saved.".format(device.name))
+            return redirect(reverse('labs_manage_devices', kwargs={'lab_id': lab.id}))
+    else:
+        form = DeviceForm(lab, instance=device)
+
+    return render(request, 'labs/edit_device.html', {
+        'lab': lab,
+        'device': device,
+        'form': form,
+        'nav_labs': 'manage',
+        'nav_labs_manage': 'devices',
+        })
+
+
+@login_required
+def delete_device(request, device_id):
+
+    device = get_object_or_404(Device, id=device_id)
+    if request.user not in device.pod.lab.owners:
+        return HttpResponseForbidden()
+
+    device.delete()
+    messages.info(request, "{0} has been deleted.".format(device.name))
+
+    return redirect(reverse('labs_manage_devices', kwargs={'lab_id': device.pod.lab.id}))

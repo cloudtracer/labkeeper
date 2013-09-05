@@ -1,17 +1,16 @@
 {% extends 'labs/_manage.html' %}
-{% load render_table from django_tables2 %}
 {% load bootstrap_toolkit %}
 
 {% block lab_manage %}
-    {% render_table table %}
     <form class="form-horizontal" action="." method="post">
       <fieldset>
-        <legend>Add a Device</legend>
+        <legend>{{ device.name }}</legend>
         {% csrf_token %}
         {{ form|as_bootstrap }}
       </fieldset>
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Create</button>
+        <a href="{% url 'labs_manage_devices' device.pod.lab_id %}" class="btn">Go back</a>
+        <button type="submit" class="btn btn-primary">Update</button>
       </div>
     </form>
 {% endblock %}

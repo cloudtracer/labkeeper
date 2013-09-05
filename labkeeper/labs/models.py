@@ -168,6 +168,7 @@ class ConsoleServerPort(models.Model):
     ssh_port = models.PositiveIntegerField('SSH port', blank=True, null=True)
 
     class Meta:
+        ordering = ['consoleserver', 'number']
         unique_together = (
             ('consoleserver', 'number'),
             ('consoleserver', 'telnet_port'),
@@ -197,7 +198,7 @@ class Device(models.Model):
     )
 
     pod = models.ForeignKey(Pod, related_name='devices')
-    cs_port = models.OneToOneField(ConsoleServerPort, related_name='device', unique=True)
+    cs_port = models.OneToOneField(ConsoleServerPort, verbose_name='Console server port', related_name='device', unique=True)
     name = models.CharField('Name', max_length=30)
     slug = models.SlugField('Slug', max_length=30, editable=False)
     type = models.PositiveSmallIntegerField('Type', choices=DEVICE_TYPES, default=ROUTER)

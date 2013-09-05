@@ -25,6 +25,8 @@ urlpatterns = patterns('labs',
     url(r'^pods/(?P<pod_id>\d+)/delete/$', 'views.delete_pod', name='labs_delete_pod'),
     url(r'^consoleservers/(?P<cs_id>\d+)/edit/$', 'views.edit_consoleserver', name='labs_edit_consoleserver'),
     url(r'^consoleservers/(?P<cs_id>\d+)/delete/$', 'views.delete_consoleserver', name='labs_delete_consoleserver'),
+    url(r'^devices/(?P<device_id>\d+)/edit/$', 'views.edit_device', name='labs_edit_device'),
+    url(r'^devices/(?P<device_id>\d+)/delete/$', 'views.delete_device', name='labs_delete_device'),
 
     # Membership invitations
     url(r'^invitations/(?P<invitation_id>\d+)/(?P<response>accept|decline)/$', 'views.invitation_response', name='labs_invitation_response'),

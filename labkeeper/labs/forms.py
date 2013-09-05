@@ -142,13 +142,19 @@ class ConsoleServerPortForm(forms.ModelForm):
 
 class DeviceForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, lab, *args, **kwargs):
         super(DeviceForm, self).__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs['class'] = 'input-block-level'
-        self.fields['pod'].widget.attrs['class'] = 'input-block-level'
-        self.fields['cs_port'].widget.attrs['class'] = 'input-block-level'
-        self.fields['type'].widget.attrs['class'] = 'input-block-level'
-        self.fields['description'].widget.attrs['class'] = 'input-block-level'
+
+        # Compile list of available ConsoleServerPorts for this Lab
+        cs_port_choices = [('', '---------')]
+        for cs in lab.consoleservers.all():
+            my_ports = []
+            for cs_port in cs.ports.filter(device=None):
+                my_ports.append((cs_port.id, cs_port))
+            cs_port_choices.append((cs, my_ports))
+
+        self.fields['pod'].queryset = lab.pods.all()
+        self.fields['cs_port'].choices = cs_port_choices
 
     class Meta:
         model = Device
