@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from labs.models import *
 
@@ -149,7 +150,7 @@ class DeviceForm(forms.ModelForm):
         cs_port_choices = [('', '---------')]
         for cs in lab.consoleservers.all():
             my_ports = []
-            for cs_port in cs.ports.filter(device=None):
+            for cs_port in cs.ports.filter(Q(device=None) | Q(device=self.instance)):
                 my_ports.append((cs_port.id, cs_port))
             cs_port_choices.append((cs, my_ports))
 
