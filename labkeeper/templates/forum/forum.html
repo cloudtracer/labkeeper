@@ -18,7 +18,10 @@
 {% for topic in topics %}
 <div class="row">
   <div class="span6">
-    <a href="{% url 'forum_topic' topic.id %}">{{ topic.subject }}</a>
+    <a href="{% url 'forum_topic' topic.id %}">
+      {% if topic.sticky %}<i class="icon-asterisk"></i>{% endif %}{% if topic.closed %}<i class="icon-ban-circle"></i>{% endif %}
+      {{ topic.subject }}
+    </a>
   </div>
   <div class="span1">
     {{ topic.view_count }}

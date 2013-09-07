@@ -66,7 +66,7 @@ class Topic(models.Model):
     last_reply = models.ForeignKey('Post', related_name='last_in_topic', blank=True, null=True, editable=False)
 
     class Meta:
-        ordering = ['sticky', '-updated']
+        ordering = ['-sticky', '-updated']
         get_latest_by = 'updated'
 
     def __unicode__(self):
