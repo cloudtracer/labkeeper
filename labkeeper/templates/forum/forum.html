@@ -1,0 +1,59 @@
+{% extends '_base.html' %}
+{% load bootstrap_toolkit %}
+
+{% block title %}{{ forum.name }}{% endblock %}
+
+{% block content %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'forum' %}">Forums</a> <span class="divider">&gt;</span></li>
+  <li class="active">{{ forum }}</li>
+</ul>
+<div class="row">
+  <div class="span6"><h5>Topic</h5></div>
+  <div class="span1"><h5>Views</h5></div>
+  <div class="span1"><h5>Replies</h5></div>
+  <div class="span2"><h5>Started</h5></div>
+  <div class="span2"><h5>Latest Reply</h5></div>
+</div>
+{% for topic in topics %}
+<div class="row">
+  <div class="span6">
+    <a href="{% url 'forum_topic' topic.id %}">{{ topic.subject }}</a>
+  </div>
+  <div class="span1">
+    {{ topic.view_count }}
+  </div>
+  <div class="span1">
+    {{ topic.reply_count }}
+  </div>
+  <div class="span2">
+    {{ topic.created }}<br />
+    by <a href="{% url 'users_profile' topic.author.username %}">{{ topic.author }}</a>
+  </div>
+  <div class="span2">
+    {% if topic.last_reply %}
+    {{ topic.last_reply.created }}<br />
+    by <a href="{% url 'users_profile' topic.last_reply.author.username %}">{{ topic.last_reply.author }}</a>
+    {% else %}
+    None
+    {% endif %}
+  </div>
+</div>
+{% empty %}
+<p>No topics yet.</p>
+{% endfor %}
+
+<div class="pagination pagination-right">
+  <ul>
+    {% if topics.has_previous %}<li><a href="?page={{ topics.previous_page_number }}">&laquo;</a></li>{% endif %}
+    {% for page in topics.paginator.page_range %}
+    <li {% ifequal page topics.number %} class="active"{% endifequal %}><a href="?page={{ page }}">{{ page }}</a></li>
+    {% endfor %}
+    {% if topics.has_next %}<li><a href="?page={{ topics.next_page_number }}">&raquo;</a></li>{% endif %}
+  </ul>
+</div>
+
+{% if request.user.is_authenticated %}
+<a href="{% url 'forum_new_topic' forum.slug %}" class="btn btn-success">Start a New Topic</a>
+{% endif %}
+{% endblock %}

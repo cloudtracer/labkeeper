@@ -1,0 +1,22 @@
+{% extends '_base.html' %}
+{% load bootstrap_toolkit %}
+
+{% block title %}Editing post #{{ post.id }}{% endblock %}
+
+{% block headextra %}
+{{ post_form.media }}
+{% endblock %}
+
+{% block content %}
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>Post #{{ post.id }}</legend>
+        {% csrf_token %}
+        {{ post_form|as_bootstrap }}
+      </fieldset>
+      <div class="form-actions">
+        <a href="{% url 'forum_topic' post.topic.id %}" class="btn">Go back</a>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </div>
+    </form>
+{% endblock %}

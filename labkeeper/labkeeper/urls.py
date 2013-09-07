@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     url(r'^$', 'labkeeper.views.home', name='home'),
 
     # Native apps
+    url(r'^forum/', include('forum.urls')),
     url(r'^labs/', include('labs.urls')),
     url(r'^reservations/', include('scheduler.urls')),
     url(r'^users/', include('users.urls')),

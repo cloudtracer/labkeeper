@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'easy_maps',
     'django_tables2',
     'sorl.thumbnail',
+    'jsonfield',
     'bootstrap_toolkit',
     'debug_toolbar',
 
@@ -143,6 +144,7 @@ INSTALLED_APPS = (
     'tinymce',
 
     # Local
+    'forum',
     'labs',
     'scheduler',
     'radiusd',

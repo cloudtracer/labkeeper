@@ -1,0 +1,25 @@
+{% extends '_base.html' %}
+{% load thumbnail %}
+
+{% block title %}Forum{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="span5"><strong>Forum</strong></div>
+  <div class="span1"><strong>Topics</strong></div>
+  <div class="span1"><strong>Posts</strong></div>
+</div>
+{% for c in categories %}
+  <h6 class="muted">{{ c }}</h6>
+  {% for f in c.forums.all %}
+    <div class="row">
+      <div class="span5">
+        <h4><a href="{% url 'forum_forum' f.slug %}">{{ f }}</a></h4>
+        <p>{{ f.description }}</p>
+      </div>
+      <div class="span1">{{ f.topic_count }}</div>
+      <div class="span1">{{ f.post_count }}</div>
+    </div>
+  {% endfor %}
+{% endfor %}
+{% endblock %}
