@@ -4,7 +4,6 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from django_bleach.models import BleachField
-from jsonfield import JSONField
 
 
 class Category(models.Model):
