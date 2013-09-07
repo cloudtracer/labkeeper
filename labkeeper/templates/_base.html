@@ -22,6 +22,7 @@
           <li><a href="{% url 'home' %}">Home</a></li>
           <li><a href="{% url 'labs' %}">Labs</a></li>
           {% if user.is_authenticated %}<li><a href="{% url 'scheduler_reservation_list' %}">Reservations</a></li>{% endif %}
+          <li><a href="{% url 'forum' %}">Forum</a></li>
         </ul>
         {% if user.is_superuser %}<ul class="nav pull-right"><li class="divider-vertical"></li><li><a href="/admin/">Admin</a></li>{% endif %}
       </div>
