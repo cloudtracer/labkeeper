@@ -14,8 +14,8 @@ urlpatterns = patterns('',
     url(r'^reservations/', include('scheduler.urls')),
     url(r'^users/', include('users.urls')),
 
-    # TinyMCE
-    url(r'^tinymce/', include('tinymce.urls')),
+    # CKEditor
+    url(r'^ckeditor/', include('ckeditor.urls')),
 
     # Admin interface
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

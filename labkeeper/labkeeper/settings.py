@@ -140,7 +140,7 @@ INSTALLED_APPS = (
 
     # User-generated content
     'django_bleach',
-    'tinymce',
+    'ckeditor',
 
     # Local
     'forum',
@@ -170,16 +170,33 @@ BLEACH_ALLOWED_ATTRIBUTES = {
 BLEACH_ALLOWED_STYLES = ['padding-left', 'text-align', 'text-decoration']
 BLEACH_STRIP_TAGS = True
 BLEACH_STRIP_COMMENTS = True
-BLEACH_DEFAULT_WIDGET = 'tinymce.widgets.TinyMCE'
+BLEACH_DEFAULT_WIDGET = 'ckeditor.widgets.CKEditorWidget'
 
-# TinyMCE
-TINYMCE_JS_URL = 'http://tinymce.cachefly.net/4.0/tinymce.min.js'
-TINYMCE_DEFAULT_CONFIG = {
-    'plugins': "code,link,paste,table,searchreplace",
-    #'theme': "simple",
-    'cleanup_on_startup': True,
-    'custom_undo_redo_levels': 10,
-    'removed_menuitems': 'newdocument',
+# CKEditor
+CKEDITOR_UPLOAD_PATH = MEDIA_ROOT + 'ckeditor/'
+CKEDITOR_CONFIGS = {
+    'default': {
+        'format_tags': 'p;h1;h2;h3;h4;pre',
+        'toolbar': [
+            {
+                'name': 'formatting',
+                'items': ['Format', '-', 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat']
+            },
+            {
+                'name': 'links',
+                'items': ['Link', 'Unlink', 'Anchor']
+            },
+            {
+                'name': 'paragraph',
+                'items': ['NumberedList', 'BulletedList', 'Blockquote', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock']
+            },
+            {
+                'name': 'misc',
+                'items': ['Source']
+            },
+        ],
+        'removePlugins': 'wordcount,oembed',
+    },
 }
 
 SUPPORTED_TIMEZONES = SortedDict((
