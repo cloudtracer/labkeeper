@@ -52,17 +52,21 @@
     </div>
     <div class="row-fluid">
       <div class="span6">
-        <small class="muted"></small>
+        <small class="muted">Reservations</small>
       </div>
       <div class="span6">
+        {{ l.reservations.count }}
       </div>
     </div>
     <div class="row-fluid">
+      {% with l.owners as owner_list %}
       <div class="span6">
-        <small class="muted"></small>
+        <small class="muted">Owner{{ owner_list|pluralize }}</small>
       </div>
       <div class="span6">
+        {{ owner_list|join:", " }}
       </div>
+      {% endwith %}
     </div>
   </div>
 </div>

@@ -47,7 +47,7 @@ class Lab(models.Model):
     last_edited_by = models.ForeignKey(User, editable=False, null=True)
 
     class Meta:
-        pass
+        ordering = ['name']
 
     def __unicode__(self):
         return self.name
