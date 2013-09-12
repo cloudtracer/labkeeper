@@ -140,7 +140,7 @@ class RadiusServer(server.Server):
         self.SendReplyPacket(pkt.fd, reply)
 
         # Logging
-        login = RadiusLogin(device=d, user=u)
+        login = RadiusLogin(lab=cs.lab, device=d, user=u)
         try:
             login.user_ip = pkt['Calling-Station-Id'][0]
         except KeyError:
