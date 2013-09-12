@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser
 from django_tables2 import RequestConfig
 
@@ -6,11 +6,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Count
-from django.forms.models import modelformset_factory, inlineformset_factory
+from django.forms.models import inlineformset_factory
 from django.http import HttpResponseForbidden, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from radiusd.tables import LoginsTable
 from scheduler.models import Reservation, Schedule
 from scheduler.forms import ReservationForm
 
@@ -180,6 +181,21 @@ def member_list(request, lab_id):
         'memberships_form': memberships_form,
         'table': table,
         'nav_labs': 'members',
+        })
+
+
+def recent_activity(request, lab_id):
+
+    lab = get_object_or_404(Lab, id=lab_id)
+
+    # Compile table of recent RADIUS logins
+    cutoff = timezone.now() - timedelta(days=7)
+    table = LoginsTable(lab.radius_logins.order_by('-time').filter(time__gte=cutoff))
+
+    return render(request, 'labs/recent_activity.html', {
+        'lab': lab,
+        'table': table,
+        'nav_labs': 'activity',
         })
 
 
