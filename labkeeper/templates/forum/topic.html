@@ -1,0 +1,56 @@
+{% extends '_base.html' %}
+{% load bootstrap_toolkit %}
+{% load render_table from django_tables2 %}
+
+{% block title %}{{ topic.subject }}{% endblock %}
+
+{% block headextra %}
+{{ reply_form.media }}
+{% endblock %}
+
+{% block content %}
+<ul class="breadcrumb">
+  <li><a href="{% url 'forum' %}">Forums</a> <span class="divider">&gt;</span></li>
+  <li><a href="{% url 'forum_forum' topic.forum.slug %}">{{ topic.forum }}</a> <span class="divider">&gt;</span></li>
+  <li class="active">{{ topic }}</li>
+</ul>
+
+<h3>{{ topic }}</h3>
+{% for post in posts %}
+{% if not forloop.first %}<hr />{% endif %}
+<div class="row">
+  <div class="span3">
+    <h4><a href="{% url 'users_profile' post.author.username %}">{{ post.author }}</a></h4>
+    {{ post.created }}<br />
+    {% ifequal request.user post.author %}<a href="{% url 'forum_edit_post' post.id %}">edit</a>{% endifequal %}
+  </div>
+  <div class="span9">
+    {{ post.body|safe }}
+    {% if post.updated %}<small class="muted">Edited on {{ post.updated }} by {{ post.updated_by }}</small>{% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="pagination pagination-right">
+  <ul>
+    {% if posts.has_previous %}<li><a href="?page={{ posts.previous_page_number }}">&laquo;</a></li>{% endif %}
+    {% for page in posts.paginator.page_range %}
+    <li {% ifequal page posts.number %} class="active"{% endifequal %}><a href="?page={{ page }}">{{ page }}</a></li>
+    {% endfor %}
+    {% if posts.has_next %}<li><a href="?page={{ posts.next_page_number }}">&raquo;</a></li>{% endif %}
+  </ul>
+</div>
+
+{% if request.user.is_authenticated and not topic.closed %}
+    <form class="form-horizontal" action="." method="post">
+      <fieldset>
+        <legend>Reply</legend>
+        {% csrf_token %}
+        {{ reply_form|as_bootstrap }}
+      </fieldset>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Post Reply</button>
+      </div>
+    </form>
+{% endif %}
+{% endblock %}
