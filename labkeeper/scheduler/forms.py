@@ -31,7 +31,7 @@ class ReservationForm(forms.Form):
         self.fields['date'] = forms.ChoiceField(choices=[(d, d.strftime("%b %-d (%a)")) for d in schedule.get_days()])
 
         # Starting time
-        self.fields['time'] = forms.ChoiceField(choices=[(h.strftime("%H:%M"), h.strftime("%H:%M")) for h in lab.get_open_hours(tz=tz)])
+        self.fields['time'] = forms.ChoiceField(choices=sorted([(h.strftime("%H:%M"), h.strftime("%H:%M")) for h in lab.get_open_hours(tz=tz)]))
 
         # Duration (in hours)
         self.fields['duration'] = forms.ChoiceField(choices=[(x, " {0} hours".format(x)) for x in range(lab.min_reservation, lab.max_reservation+1)])
