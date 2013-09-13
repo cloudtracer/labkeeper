@@ -1,3 +1,4 @@
+import logging
 import socket
 from pyrad import dictionary, packet, server
 from optparse import make_option
@@ -9,6 +10,10 @@ from django.utils import timezone
 from scheduler.models import Reservation
 from labs.models import ConsoleServer, ConsoleServerPort
 from radiusd.models import RadiusLogin
+
+
+logger = logging.getLogger(__name__)
+
 
 # Resolve a domain name to one or more IPv4 and/or IPv6 addresses
 def domain_to_ip(domain):
@@ -25,12 +30,12 @@ class RadiusServer(server.Server):
     # Bail on processing a request any further
     def bail(self, message=None):
         if message:
-            print "[{0}] {1}".format(self.auth_counter, message)
+            logger.warning(message)
         raise server.ServerPacketError()
 
     # Debugging
     def debug(self, message):
-        print "[{0}] {1}".format(self.auth_counter, message)
+        logger.debug("[{0}] {1}".format(self.auth_counter, message))
 
     # Send an Access-Reject reply
     def access_reject(self, pkt, message=None):
@@ -38,8 +43,8 @@ class RadiusServer(server.Server):
         reply = self.CreateReplyPacket(pkt)
         reply.code = packet.AccessReject
         if message:
-            print "[{0}] Access rejected: {1}".format(self.auth_counter, message)
             reply.AddAttribute('Reply-Message', message)
+            self.debug("Access rejected: {0}".format(message))
         self.SendReplyPacket(pkt.fd, reply)
 
     # Overriding Server's internal auth method because we need to handle NAS authentication dynamically
@@ -84,7 +89,7 @@ class RadiusServer(server.Server):
                 cs = ConsoleServer.objects.get(ip4_address=pkt.source[0])
             except ConsoleServer.DoesNotExist:
                 self.bail("Unrecognized console server ({0})".format(pkt.source[0]))
-        self.debug("Found console server: {0}".format(self.auth_counter, cs))
+        self.debug("Identified console server {0} ({1}/{2})".format(cs.id, cs.lab, cs.name))
 
         # Step 2: Shared secret validation
         try:
@@ -109,7 +114,7 @@ class RadiusServer(server.Server):
 
         # Step 5: Validate that the Reservation is current
         if r.start_time > timezone.now():
-            self.access_reject(pkt, "Your reservation has not started yet (scheduled for {0})".format(r.start_time))
+            self.access_reject(pkt, "Your reservation has not started yet (scheduled for {0} UTC)".format(r.start_time))
             return
 
         # Step 6: Match the given NAS-Port to a ConsoleServerPort
@@ -121,7 +126,7 @@ class RadiusServer(server.Server):
 
         # Step 7: Validate that this Device belongs to one of the reserved Pods
         if d.pod not in r.pods.all():
-            self.access_reject(pkt, "This device does not belong to one of the reserved pods")
+            self.access_reject(pkt, "This device is not in one of the reserved pods")
             return
 
         # Step 8: Success! Reward the user with an Access-Accept response
@@ -174,6 +179,7 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
+
         srv = RadiusServer(dict=dictionary.Dictionary('radiusd/dictionary'))
         srv.BindToAddress('')
         srv.Run()

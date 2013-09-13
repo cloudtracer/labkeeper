@@ -331,12 +331,24 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s',
         },
+        'standard': {
+            'format' : "[%(asctime)s] %(levelname)s %(message)s",
+            'datefmt' : "%Y-%m-%d %H:%M:%S"
+        },
     },
     'handlers': {
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
+        },
+        'radiusd_logfile': {
+            'level': 'INFO',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': '/var/log/labkeeper/radiusd',
+            'maxBytes': 10000000,
+            'backupCount': 9,
+            'formatter': 'standard',
         },
         'mail_admins': {
             'level': 'ERROR',
@@ -349,6 +361,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'ERROR',
         },
+        'radiusd': {
+            'handlers': ['console', 'radiusd_logfile'],
+            'level': 'DEBUG',
+        }
     }
 }
 
