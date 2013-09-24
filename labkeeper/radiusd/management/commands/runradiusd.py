@@ -137,8 +137,8 @@ class RadiusServer(server.Server):
             'Session-Timeout':      r.time_left.seconds,
             'Termination-Action':   0,
             #'Framed-Filter-Id':     ':group_name=admin:', # Needed for Opengear?
-            'Reply-Message':        "Welcome to {0} - Pod {1}! Reservation ID: {2}\n"
-                                    "Your reservation ends in {3}.".format(d.pod.lab, d.pod, r.id, str(r.time_left).split('.')[0]),
+            'Reply-Message':        "Welcome to {0} - Pod {1} - {2}! (Reservation ID: {3})\n"
+                                    "Your reservation ends in {4}.\n".format(cs.lab, d.pod, d.name, r.id, str(r.time_left).split('.')[0])[0:253],
         }
         for k, v in attrs.items():
             reply.AddAttribute(k, v)

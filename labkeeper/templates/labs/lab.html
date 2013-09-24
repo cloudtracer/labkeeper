@@ -8,7 +8,8 @@
 {% include 'labs/_nav_header.html' %}
 <div class="row">
   <div class="span7">
-    <p>{{ lab.profile|safe }}</p>
+    {{ lab.profile|safe }}
+    {% if lab.last_edited %}<p><small class="muted">Last updated on {{ lab.last_edited|date }} by {{ lab.last_edited_by }}</small></p>{% endif %}
     <hr>
     <h3>Lab Pods</h3>
     {% for pod in lab.pods.all %}
